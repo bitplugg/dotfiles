@@ -2,7 +2,7 @@ if not contains ~/.local/bin $PATH
     set -x PATH ~/.local/bin $PATH
 end
 
-set -x MISTRAL_API_KEY 'your-mistral-api-key'
+set -x MISTRAL_API_KEY '***'
 
 if status is-interactive
     if type -q zoxide
