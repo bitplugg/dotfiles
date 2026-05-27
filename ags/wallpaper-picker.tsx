@@ -3,7 +3,6 @@ import GLib from "gi://GLib"
 import Gio from "gi://Gio?version=2.0"
 import Gtk from "gi://Gtk?version=4.0"
 import Gdk from "gi://Gdk?version=4.0"
-import GdkPixbuf from "gi://GdkPixbuf?version=2.0"
 import Astal from "gi://Astal?version=4.0"
 import { onCleanup } from "ags"
 import { execAsync } from "ags/process"
@@ -12,16 +11,8 @@ const HOME = GLib.get_home_dir()
 const WALL_DIR = `${HOME}/Pictures/wallpapers`
 const THUMB_W = 200
 const THUMB_H = 125
-const CACHE_DIR = `${HOME}/.cache/ags-wallpapers`
-
-execAsync(`mkdir -p ${CACHE_DIR}`).catch(() => {})
 
 const WALLPAPER_CMD = `${HOME}/.local/bin/wallpaper`
-
-function getCachedThumb(path: string): string {
-  const safe = path.replace(/[^a-zA-Z0-9]/g, "_")
-  return `${CACHE_DIR}/${safe}_${THUMB_W}x${THUMB_H}.png`
-}
 
 function findImages(dir: string): string[] {
   const results: string[] = []
@@ -40,32 +31,19 @@ function findImages(dir: string): string[] {
   return results.sort(() => Math.random() - 0.5)
 }
 
-function ensureThumb(path: string, cachePath: string): void {
-  if (GLib.file_test(cachePath, GLib.FileTest.EXISTS)) return
-  try {
-    const pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(path, THUMB_W, THUMB_H, true)
-    if (!pixbuf) return
-    const w = pixbuf.get_width()
-    const h = pixbuf.get_height()
-    const offX = Math.max(0, Math.floor((w - THUMB_W) / 2))
-    const offY = Math.max(0, Math.floor((h - THUMB_H) / 2))
-    const cw = Math.min(THUMB_W, w)
-    const ch = Math.min(THUMB_H, h)
-    const cropped = GdkPixbuf.Pixbuf.new_subpixbuf(pixbuf, offX, offY, cw, ch)
-    cropped.savev(cachePath, "png", [], [])
-  } catch { /* ignore */ }
+function genThumb(path: string, cache: string): void {
+  execAsync(
+    `magick "${path}" -resize ${THUMB_W}x${THUMB_H}^ -gravity center -extent ${THUMB_W}x${THUMB_H} "${cache}" 2>/dev/null || ` +
+    `convert "${path}" -resize ${THUMB_W}x${THUMB_H}^ -gravity center -extent ${THUMB_W}x${THUMB_H} "${cache}" 2>/dev/null || ` +
+    `true`,
+  ).catch(() => {})
 }
 
 function Thumbnail({ path, onSelect }: { path: string; onSelect: (p: string) => void }) {
   const name = path.split("/").pop() ?? ""
   const displayName = name.length > 30 ? name.slice(0, 28) + "…" : name
-  const cachePath = getCachedThumb(path)
 
-  ensureThumb(path, cachePath)
-
-  let pixbuf: GdkPixbuf.Pixbuf | null = null
-  try { pixbuf = GdkPixbuf.Pixbuf.new_from_file(cachePath) } catch { /* */ }
-
+  // Use original file - Gtk handles scaling
   return (
     <Gtk.Box orientation={Gtk.Orientation.VERTICAL} spacing={2}>
       <Gtk.Button
@@ -73,11 +51,7 @@ function Thumbnail({ path, onSelect }: { path: string; onSelect: (p: string) => 
         cursor={Gdk.Cursor.new_from_name("pointer")}
       >
         <Gtk.Box cssClasses={["thumb"]}>
-          {pixbuf ? (
-            <Gtk.Image pixbuf={pixbuf} />
-          ) : (
-            <Gtk.Label label="" cssClasses={["fallback"]} />
-          )}
+          <Gtk.Image file={path} />
         </Gtk.Box>
       </Gtk.Button>
       <Gtk.Label label={displayName} cssClasses={["name"]} />
