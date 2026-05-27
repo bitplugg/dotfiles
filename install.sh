@@ -92,6 +92,7 @@ header "AUR Packages"
 install_packages "AUR" \
     hyprswitch cliphist nwg-displays \
     cava pywalfox \
+    libastal-git libastal-4-git libastal-meta \
     openclaw searxng-git
 
 # ── AGS (Aylur's Widget Suite) ────────────────

@@ -1,34 +1,35 @@
 #!/usr/bin/env bash
-# Launcher/manager for AGS (Aylur's Widget Suite)
+# Launcher/manager for AGS bar
 ACTION="${1:-toggle}"
+INSTANCE="ags"
 
 case "$ACTION" in
     start)
-        if pgrep -x ags > /dev/null; then
-            echo "AGS already running"
+        if ags list 2>/dev/null | grep -q "^${INSTANCE}$"; then
+            echo "AGS bar already running"
         else
             cd ~/.config/ags && ags run app.tsx &
             disown
         fi
         ;;
     stop)
-        ags quit 2>/dev/null || pkill -x ags 2>/dev/null || true
+        ags quit "$INSTANCE" 2>/dev/null || true
         ;;
     restart)
-        ags quit 2>/dev/null || pkill -x ags 2>/dev/null || true
+        ags quit "$INSTANCE" 2>/dev/null
         sleep 0.5
         cd ~/.config/ags && ags run app.tsx &
         disown
         ;;
     toggle)
-        if pgrep -x ags > /dev/null; then
+        if ags list 2>/dev/null | grep -q "^${INSTANCE}$"; then
             exec "$0" stop
         else
             exec "$0" start
         fi
         ;;
     status)
-        if pgrep -x ags > /dev/null; then
+        if ags list 2>/dev/null | grep -q "^${INSTANCE}$"; then
             echo " AGS: running"
         else
             echo " AGS: stopped"
