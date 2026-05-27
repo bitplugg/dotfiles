@@ -18,6 +18,7 @@ My Hyprland rice with pywal theming.
 | AI Gateway | OpenClaw + Mistral AI + Telegram |
 | Audio Visualizer | Cava |
 | Advanced Widgets | AGS (Aylur's Widget Suite) |
+| Wallpaper Picker | AGS (GTK4, TypeScript) |
 | Colors | pywal16 (generated from wallpaper) |
 | Wallpaper | Awww + custom picker |
 
@@ -31,7 +32,7 @@ My Hyprland rice with pywal theming.
 - AGS custom GTK bar widgets
 - Screenshot tools (hyprshot + gallery)
 - Power menu, emoji picker, clipboard manager
-- Wallpaper picker GUI (Python/tkinter)
+- Wallpaper picker GUI (AGS/GTK4, thumbnails with cache)
 - Auto-update checks + git backup
 - Comprehensive install script with deps
 
@@ -50,6 +51,7 @@ cd ~/dotfiles
 | Super+O | OpenClaw launcher |
 | Super+C | Cava toggle |
 | Super+A | AGS bar toggle |
+| Super+W | Wallpaper picker (AGS) |
 | Super+E | Neo-tree toggle |
 | Super+Space | App launcher |
 | Super+Shift+C | Color picker |
