@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Waybar custom module: mic status
+MUTED=$(wpctl get-volume @DEFAULT_AUDIO_SOURCE@ 2>/dev/null | grep -c MUTED)
+if [ "$MUTED" -gt 0 ]; then
+    echo '{"text": "", "class": "muted", "tooltip": "Mic muted"}'
+else
+    echo '{"text": "", "class": "unmuted", "tooltip": "Mic active"}'
+fi

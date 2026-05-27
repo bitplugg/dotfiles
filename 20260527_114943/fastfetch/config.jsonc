@@ -1,0 +1,26 @@
+{
+  "logo": { "type": "small", "color": { "1": "magenta" } },
+  "display": {
+    "separator": "  ",
+    "color": { "title": "magenta", "keys": "yellow", "separator": "magenta" }
+  },
+  "modules": [
+    { "type": "title", "format": "┌─ {3}@{4} ─┐" },
+    "separator",
+    { "type": "os", "key": "  OS", "keyColor": "cyan" },
+    { "type": "host", "key": "󰌢  Host", "keyColor": "blue" },
+    { "type": "kernel", "key": "  Kernel", "keyColor": "magenta" },
+    { "type": "uptime", "key": "  Uptime", "keyColor": "green" },
+    { "type": "packages", "key": "  Packages", "keyColor": "yellow" },
+    { "type": "shell", "key": "  Shell", "keyColor": "cyan" },
+    { "type": "de", "key": "  DE", "keyColor": "blue" },
+    { "type": "wm", "key": "  WM", "keyColor": "magenta" },
+    { "type": "terminal", "key": "  Terminal", "keyColor": "green" },
+    { "type": "cpu", "key": "  CPU", "keyColor": "yellow" },
+    { "type": "gpu", "key": "󰾲  GPU", "keyColor": "cyan" },
+    { "type": "memory", "key": "  Memory", "keyColor": "blue" },
+    { "type": "disk", "key": "  Disk", "keyColor": "magenta" },
+    "break",
+    { "type": "colors", "symbol": "circle" }
+  ]
+}

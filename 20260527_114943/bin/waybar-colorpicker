@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Pick a color and copy to clipboard
+color=$(hyprpicker --autocopy --format hex 2>/dev/null)
+if [ -n "$color" ]; then
+    notify-send "Color picked" "$color   (copied to clipboard)"
+fi

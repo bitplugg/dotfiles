@@ -1,0 +1,20 @@
+{
+  "logo": { "type": "small", "color": { "1": "magenta" } },
+  "display": {
+    "separator": "   ",
+    "color": { "keys": "magenta", "values": "default" }
+  },
+  "modules": [
+    { "type": "title", "format": "{3}@{4}" },
+    { "type": "os", "key": " OS" },
+    { "type": "kernel", "key": " Kernel" },
+    { "type": "uptime", "key": " Uptime" },
+    { "type": "packages", "key": " Packages" },
+    "separator",
+    { "type": "localip", "key": "󰩟 IP" },
+    { "type": "battery", "key": " Battery" },
+    { "type": "cpu", "key": " CPU" },
+    { "type": "memory", "key": " Memory" },
+    { "type": "colors", "symbol": "circle" }
+  ]
+}

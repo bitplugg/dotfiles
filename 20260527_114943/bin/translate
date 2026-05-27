@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Translate text
+text=$(echo "" | ~/.local/bin/dmenu -p "Translate (ru→en)")
+[ -z "$text" ] && exit 0
+result=$(trans -brief -no-ansi :en "$text" 2>/dev/null)
+[ -z "$result" ] && result=$(curl -s "https://translate.googleapis.com/translate_a/single?client=gtx&sl=ru&tl=en&dt=t&q=${text}" 2>/dev/null | python3 -c "import json,sys; print(json.load(sys.stdin)[0][0][0])" 2>/dev/null)
+notify-send "Translate" "$text\n→ $result"
+echo "$result" | wl-copy

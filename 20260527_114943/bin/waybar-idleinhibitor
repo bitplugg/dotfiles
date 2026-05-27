@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Idle inhibitor status for waybar
+STATE_FILE="/tmp/hypridle_inhibited"
+if [ -f "$STATE_FILE" ]; then
+    echo '{"text": "󰅶", "tooltip": "Auto-suspend disabled", "class": "disabled"}'
+else
+    echo '{"text": "󰾪", "tooltip": "Auto-suspend enabled", "class": "enabled"}'
+fi

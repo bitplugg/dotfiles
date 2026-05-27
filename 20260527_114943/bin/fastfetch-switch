@@ -1,0 +1,33 @@
+#!/usr/bin/env fish
+
+set presets_dir ~/.config/fastfetch/presets
+set presets (ls $presets_dir/*.jsonc | xargs -n1 basename | sed 's/\.jsonc$//')
+
+echo "Available fastfetch presets:"
+echo ""
+
+set i 1
+for preset in $presets
+    echo "  $i) $preset"
+    set i (math $i + 1)
+end
+
+echo ""
+read -p "echo 'Choose preset (number): '" choice
+
+if test -z "$choice"
+    exit 0
+end
+
+set selected $presets[$choice]
+
+if test -z "$selected"
+    echo "Invalid choice"
+    exit 1
+end
+
+echo "Activating: $selected"
+cp "$presets_dir/$selected.jsonc" ~/.config/fastfetch/config.jsonc
+
+# Run it once to show
+fastfetch

@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# Show dunst notification history in wofi
+
+history=$(dunstctl history 2>/dev/null)
+[ -z "$history" ] && notify-send "No notifications in history" && exit 0
+
+entries=$(echo "$history" | python3 -c "
+import json, sys
+data = json.load(sys.stdin).get('data', [])
+if not data:
+    print('__empty__')
+    sys.exit(0)
+for notification in data:
+    # Each notification is a list of variant dicts
+    n = notification[0] if isinstance(notification, list) and notification else notification
+    summary = n.get('summary', {}).get('data', '') or ''
+    body = n.get('body', {}).get('data', '') or ''
+    urgency = n.get('urgency', {}).get('data', 'normal') or 'normal'
+    icon_map = {'low': '', 'normal': '', 'critical': ''}
+    icon = icon_map.get(str(urgency), '')
+    text = summary.replace('\n', ' ').strip()[:50]
+    text_body = body.replace('\n', ' ').strip()[:60]
+    if text and text_body:
+        line = f'{icon}  {text} | {text_body}'
+    elif text:
+        line = f'{icon}  {text}'
+    else:
+        line = f'{icon}  (no text)'
+    print(line)
+")
+
+[ "$entries" = "__empty__" ] && notify-send "No notifications in history" && exit 0
+
+selected=$(echo "$entries" | ~/.local/bin/dmenu -p "Notifications")
+[ -z "$selected" ] && exit 0
+
+dunstctl history-pop

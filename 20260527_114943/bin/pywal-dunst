@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# Update dunst colors from pywal
+
+WAL="$HOME/.cache/wal/colors.json"
+DUNSTRC="$HOME/.config/dunst/dunstrc"
+
+[ ! -f "$WAL" ] && exit 1
+
+BG=$(python3 -c "import json; c=json.load(open('$WAL')); print(c['special']['background'])")
+FG=$(python3 -c "import json; c=json.load(open('$WAL')); print(c['special']['foreground'])")
+C0=$(python3 -c "import json; c=json.load(open('$WAL')); print(c['colors']['color0'])")
+C4=$(python3 -c "import json; c=json.load(open('$WAL')); print(c['colors']['color4'])")
+C1=$(python3 -c "import json; c=json.load(open('$WAL')); print(c['colors']['color1'])")
+C7=$(python3 -c "import json; c=json.load(open('$WAL')); print(c['colors']['color7'])")
+
+# Update global section
+sed -i "s/^background = .*/background = \"$BG\"/" "$DUNSTRC"
+sed -i "s/^foreground = .*/foreground = \"$FG\"/" "$DUNSTRC"
+sed -i "s/^frame_color = .*/frame_color = \"$C4\"/" "$DUNSTRC"
+
+# Update urgency_low
+sed -i "/^\[urgency_low\]/,/^\[/ s/^background = .*/background = \"$C0\"/" "$DUNSTRC"
+sed -i "/^\[urgency_low\]/,/^\[/ s/^foreground = .*/foreground = \"$FG\"/" "$DUNSTRC"
+
+# Update urgency_normal
+sed -i "/^\[urgency_normal\]/,/^\[/ s/^background = .*/background = \"$BG\"/" "$DUNSTRC"
+sed -i "/^\[urgency_normal\]/,/^\[/ s/^foreground = .*/foreground = \"$FG\"/" "$DUNSTRC"
+
+# Update urgency_critical
+sed -i "/^\[urgency_critical\]/,/^\[/ s/^background = .*/background = \"$C1\"/" "$DUNSTRC"
+sed -i "/^\[urgency_critical\]/,/^\[/ s/^foreground = .*/foreground = \"$C7\"/" "$DUNSTRC"
+
+# Reload dunst
+pkill -SIGUSR2 dunst 2>/dev/null || true
+
+echo "dunst colors updated"

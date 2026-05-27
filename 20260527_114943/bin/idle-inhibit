@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Toggle hypridle inhibition
+STATE_FILE="/tmp/hypridle_inhibited"
+
+if [ -f "$STATE_FILE" ]; then
+    rm "$STATE_FILE"
+    killall hypridle 2>/dev/null
+    hypridle &
+    notify-send "Idle" "Auto-suspend enabled"
+else
+    touch "$STATE_FILE"
+    killall hypridle 2>/dev/null
+    notify-send "Idle" "Auto-suspend disabled"
+fi

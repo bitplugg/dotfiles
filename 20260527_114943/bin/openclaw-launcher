@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Quick launcher for OpenClaw via wofi/rofi
+LAUNCHER=$(cat "$HOME/.config/launcher.txt" 2>/dev/null || echo "rofi")
+
+if [ "$LAUNCHER" = "wofi" ]; then
+    # list sessions and run via wofi
+    CHOICE=$(printf "Chat\nStatus\nRestart\nStop" | wofi --dmenu --prompt "OpenClaw" --width 200 --lines 4)
+    case "$CHOICE" in
+        Chat) kitty -e openclaw chat ;;
+        Status) kitty -e openclaw status ;;
+        Restart) systemctl --user restart openclaw-gateway ;;
+        Stop) systemctl --user stop openclaw-gateway ;;
+    esac
+else
+    # rofi
+    CHOICE=$(printf "Chat\nStatus\nRestart\nStop" | rofi -dmenu -p "OpenClaw")
+    case "$CHOICE" in
+        Chat) kitty -e openclaw chat ;;
+        Status) kitty -e openclaw status ;;
+        Restart) systemctl --user restart openclaw-gateway ;;
+        Stop) systemctl --user stop openclaw-gateway ;;
+    esac
+fi

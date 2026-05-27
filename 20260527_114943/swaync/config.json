@@ -1,0 +1,86 @@
+{
+    "$schema": "/etc/xdg/swaync/configSchema.json",
+    "positionX": "right",
+    "positionY": "top",
+    "layer": "overlay",
+    "control-center-margin-top": 6,
+    "control-center-margin-bottom": 6,
+    "control-center-margin-right": 6,
+    "control-center-margin-left": 0,
+    "notification-icon-size": 36,
+    "notification-body-image-height": 100,
+    "notification-body-image-width": 200,
+    "timeout": 5,
+    "timeout-low": 5,
+    "timeout-critical": 0,
+    "fit-to-screen": true,
+    "control-center-width": 380,
+    "control-center-height": 600,
+    "notification-window-width": 350,
+    "keyboard-shortcuts": true,
+    "image-visibility": "when-available",
+    "hide-on-clear": false,
+    "hide-on-action": false,
+    "widgets": [
+        "title",
+        "dnd",
+        "notifications",
+        "mpris",
+        "volume",
+        "buttons-grid"
+    ],
+    "widget-config": {
+        "title": {
+            "text": "Notifications",
+            "clear-all-button": true,
+            "button-text": "󰸞"
+        },
+        "dnd": {
+            "text": "Do Not Disturb"
+        },
+        "mpris": {
+            "image-size": 48,
+            "image-radius": 8
+        },
+        "volume": {
+            "label": ""
+        },
+        "buttons-grid": {
+            "buttons-per-row": 4,
+            "actions": [
+                {
+                    "label": "󰍳",
+                    "command": "hyprshot -m output"
+                },
+                {
+                    "label": "󰤆",
+                    "command": "~/.local/bin/powermenu"
+                },
+                {
+                    "label": "",
+                    "command": "~/.local/bin/settings"
+                },
+                {
+                    "label": "",
+                    "command": "hyprlock"
+                },
+                {
+                    "label": "",
+                    "command": "~/.local/bin/mic-toggle"
+                },
+                {
+                    "label": "",
+                    "command": "~/.local/bin/night-mode"
+                },
+                {
+                    "label": "",
+                    "command": "~/.local/bin/calculator"
+                },
+                {
+                    "label": "",
+                    "command": "cliphist list | ~/.local/bin/dmenu -p 'Clipboard' | cliphist decode | wl-copy"
+                }
+            ]
+        }
+    }
+}

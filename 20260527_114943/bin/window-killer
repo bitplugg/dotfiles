@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Window killer - list windows and kill selected
+clients=$(hyprctl clients -j 2>/dev/null | python3 -c "
+import json, sys
+clients = json.load(sys.stdin)
+for c in sorted(clients, key=lambda x: x.get('workspace', {}).get('id', 0)):
+    ws = c.get('workspace', {}).get('id', '?')
+    title = c.get('title', '') or 'untitled'
+    cls = c.get('class', '') or '?'
+    addr = c.get('address', '')
+    print(f'{ws} | {cls}: {title[:60]} | {addr}')
+" 2>/dev/null)
+[ -z "$clients" ] && notify-send "Windows" "No windows found" && exit 0
+selected=$(echo "$clients" | ~/.local/bin/dmenu -p "Kill window")
+[ -z "$selected" ] && exit 0
+addr=$(echo "$selected" | awk -F' | ' '{print $NF}')
+[ -n "$addr" ] && hyprctl dispatch closewindow address:"$addr" 2>/dev/null

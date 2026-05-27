@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Show recent screenshots
+dir="$HOME/Pictures/screenshots"
+[ -d "$dir" ] || dir="$HOME"
+files=$(find "$dir" -maxdepth 1 \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.mp4" \) -printf "%T@ %p\0" 2>/dev/null | sort -rnz | head -20 | cut -z -f2- | tr '\0' '\n')
+[ -z "$files" ] && notify-send "Screenshots" "No screenshots found" && exit 0
+selected=$(echo "$files" | xargs -I{} basename "{}" | ~/.local/bin/dmenu -p "Screenshots")
+[ -z "$selected" ] && exit 0
+file="$dir/$selected"
+[ -f "$file" ] && imv "$file" &

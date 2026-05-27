@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# App launcher wrapper — uses wofi or rofi based on ~/.config/launcher.txt
+LAUNCHER=$(cat "$HOME/.config/launcher.txt" 2>/dev/null || echo "rofi")
+case "$LAUNCHER" in
+  wofi) exec wofi --show drun ;;
+  rofi) exec rofi -show drun -theme "$HOME/.config/rofi/drun.rasi" ;;
+esac

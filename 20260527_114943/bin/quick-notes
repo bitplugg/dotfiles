@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Quick notes — rofi + markdown files
+NOTES_DIR="$HOME/notes"
+mkdir -p "$NOTES_DIR"
+
+case "${1:-menu}" in
+  new)
+    NAME=$(~/.local/bin/dmenu -p "Note name")
+    [ -z "$NAME" ] && exit 0
+    FILE="$NOTES_DIR/$(date +%Y%m%d_%H%M)_${NAME// /_}.md"
+    kitty -e nvim "$FILE"
+    ;;
+  *)
+    FILES=$(find "$NOTES_DIR" -name "*.md" -printf "%T@ %p\0" | sort -rnz | cut -z -f2- | tr '\0' '\n' 2>/dev/null)
+    if [ -z "$FILES" ]; then
+      ACTION=$(echo -e " New note" | ~/.local/bin/dmenu -p "No notes yet")
+      [ "$ACTION" = " New note" ] && exec "$0" new
+      exit 0
+    fi
+    SELECTED=$(echo "$FILES" | xargs -I{} basename "{}" | ~/.local/bin/dmenu -p "Notes")
+    [ -z "$SELECTED" ] && exit 0
+    kitty -e nvim "$NOTES_DIR/$SELECTED"
+    ;;
+esac

@@ -1,0 +1,156 @@
+{
+    "layer": "top",
+    "position": "top",
+    "margin-top": 6,
+    "margin-left": 6,
+    "margin-right": 6,
+    "modules-left": ["custom/launcher", "hyprland/workspaces", "custom/idleinhibitor", "custom/colorpicker", "custom/updates", "cpu", "memory", "custom/weather"],
+    "modules-center": ["hyprland/window", "custom/media"],
+    "modules-right": ["pulseaudio", "custom/mic", "custom/nightmode", "network", "bluetooth", "battery", "clock", "tray", "custom/power"],
+    "hyprland/workspaces": {
+        "format": "{icon}",
+        "format-icons": {
+            "1": "1",
+            "2": "2",
+            "3": "3",
+            "4": "4",
+            "5": "5",
+            "6": "6",
+            "7": "7",
+            "8": "8",
+            "9": "9",
+            "urgent": "",
+            "focused": "",
+            "default": ""
+        },
+        "on-click": "activate"
+    },
+    "hyprland/window": {
+        "format": "{}",
+        "max-length": 40,
+        "separate-outputs": true
+    },
+    "custom/media": {
+        "format": "{icon} {text}",
+        "return-type": "json",
+        "max-length": 40,
+        "format-icons": {
+            "Playing": "",
+            "Paused": "⏸",
+            "Stopped": ""
+        },
+        "exec": "playerctl -a metadata --format '{\"text\": \"{{artist}} - {{title}}\", \"alt\": \"{{status}}\", \"class\": \"{{status}}\"}' 2>/dev/null || echo '{\"text\": \"\", \"alt\": \"Stopped\"}'",
+        "on-click": "playerctl play-pause",
+        "on-scroll-up": "playerctl next",
+        "on-scroll-down": "playerctl previous",
+        "smooth-scrolling-threshold": 5
+    },
+    "pulseaudio": {
+        "format": "{icon} {volume}%",
+        "format-icons": {
+            "default": ["", "", ""]
+        },
+        "format-muted": " 0%",
+        "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+        "on-scroll-up": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+",
+        "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-",
+        "scroll-step": 5
+    },
+    "network": {
+        "format-wifi": " {signalStrength}%",
+        "format-ethernet": "󰈀 {ifname}",
+        "format-disconnected": "󰤮",
+        "tooltip-format-wifi": "{essid} ({signalStrength}%)",
+        "on-click": "nm-connection-editor"
+    },
+    "bluetooth": {
+        "format": "",
+        "format-disabled": "",
+        "format-connected": " {num_connections}",
+        "tooltip-format": "{device_alias}",
+        "on-click": "blueman-manager"
+    },
+    "cpu": {
+        "format": " {usage}%",
+        "interval": 5
+    },
+    "memory": {
+        "format": " {}%",
+        "interval": 10
+    },
+    "battery": {
+        "format": "{icon} {capacity}%",
+        "format-icons": ["", "", "", "", ""],
+        "format-charging": " {capacity}%",
+        "format-plugged": " {capacity}%",
+        "format-full": " {capacity}%",
+        "interval": 30
+    },
+    "clock": {
+        "format": " {:%d/%m   %H:%M}",
+        "tooltip-format": "<big>{:%A, %d %B %Y}</big>\n<tt><small>{calendar}</small></tt>",
+        "calendar": {
+            "mode": "month",
+            "format": {
+                "months": "<span color='#89b4fa'><b>{}</b></span>",
+                "days": "<span color='#cdd6f4'>{}</span>",
+                "weeks": "<span color='#585b70'><b>W{}</b></span>",
+                "weekdays": "<span color='#89b4fa'><b>{}</b></span>",
+                "today": "<span color='#a6e3a1'><b><u>{}</u></b></span>"
+            }
+        },
+        "interval": 60
+    },
+    "tray": {
+        "spacing": 8
+    },
+    "custom/power": {
+        "format": "⏻",
+        "on-click": "~/.local/bin/powermenu",
+        "tooltip": false
+    },
+    "custom/launcher": {
+        "format": "",
+        "on-click": "~/.local/bin/appmenu",
+        "tooltip": false
+    },
+    "custom/idleinhibitor": {
+        "exec": "~/.local/bin/waybar-idleinhibitor",
+        "return-type": "json",
+        "interval": 5,
+        "on-click": "~/.local/bin/idle-inhibit",
+        "tooltip": true
+    },
+    "custom/colorpicker": {
+        "format": "",
+        "on-click": "~/.local/bin/waybar-colorpicker",
+        "tooltip": false
+    },
+    "custom/updates": {
+        "exec": "~/.local/bin/waybar-updates",
+        "interval": 3600,
+        "format": " {}",
+        "on-click": "kitty -e paru -Syu",
+        "tooltip": false
+    },
+    "custom/weather": {
+        "exec": "~/.local/bin/waybar-weather",
+        "interval": 1800,
+        "format": "{}",
+        "tooltip": true
+    },
+    "custom/mic": {
+        "exec": "~/.local/bin/waybar-mic",
+        "return-type": "json",
+        "interval": 2,
+        "on-click": "~/.local/bin/mic-toggle",
+        "tooltip": true
+    },
+    "custom/nightmode": {
+        "exec": "~/.local/bin/waybar-night-mode",
+        "return-type": "json",
+        "interval": 10,
+        "on-click": "~/.local/bin/night-mode",
+        "tooltip": true
+    }
+}

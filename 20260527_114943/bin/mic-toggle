@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Toggle microphone mute
+is_muted=$(wpctl get-volume @DEFAULT_AUDIO_SOURCE@ 2>/dev/null | grep -c MUTED)
+if [ "$is_muted" -gt 0 ]; then
+    wpctl set-mute @DEFAULT_AUDIO_SOURCE@ 0
+    notify-send "Mic" "Unmuted "
+    swayosd-client --output-volume 50 2>/dev/null &
+else
+    wpctl set-mute @DEFAULT_AUDIO_SOURCE@ 1
+    notify-send "Mic" "Muted "
+    swayosd-client --output-volume 0 2>/dev/null &
+fi

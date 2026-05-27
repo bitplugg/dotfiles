@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# Set GTK theme colors from pywal
+
+WAL="$HOME/.cache/wal/colors.json"
+GTK3="$HOME/.config/gtk-3.0/gtk.css"
+GTK4="$HOME/.config/gtk-4.0/gtk.css"
+
+[ ! -f "$WAL" ] && exit 0
+
+BG=$(python3 -c "import json; c=json.load(open('$WAL')); print(c['special']['background'])")
+FG=$(python3 -c "import json; c=json.load(open('$WAL')); print(c['special']['foreground'])")
+C0=$(python3 -c "import json; c=json.load(open('$WAL')); print(c['colors']['color0'])")
+C4=$(python3 -c "import json; c=json.load(open('$WAL')); print(c['colors']['color4'])")
+C1=$(python3 -c "import json; c=json.load(open('$WAL')); print(c['colors']['color1'])")
+C2=$(python3 -c "import json; c=json.load(open('$WAL')); print(c['colors']['color2'])")
+C8=$(python3 -c "import json; c=json.load(open('$WAL')); print(c['colors']['color8'])")
+C7=$(python3 -c "import json; c=json.load(open('$WAL')); print(c['colors']['color7'])")
+
+GTK_CSS="
+@define-color bg $BG;
+@define-color fg $FG;
+@define-color surface $C0;
+@define-color accent $C4;
+@define-color error $C1;
+@define-color success $C2;
+@define-color muted $C8;
+@define-color border $C8;
+
+window {
+    background-color: @bg;
+    color: @fg;
+}
+
+entry, button, textview, text {
+    background-color: @surface;
+    color: @fg;
+}
+
+entry:focus, button:hover {
+    border-color: @accent;
+}
+
+scrollbar slider {
+    background-color: @accent;
+}
+
+scrollbar trough {
+    background-color: @surface;
+}
+
+selection {
+    background-color: @accent;
+    color: @bg;
+}
+"
+
+mkdir -p "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0"
+echo "$GTK_CSS" > "$GTK3"
+echo "$GTK_CSS" > "$GTK4"
+echo "GTK theme updated"

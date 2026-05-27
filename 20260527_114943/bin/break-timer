@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Simple pomodoro timer
+minutes=$(echo -e "25\n15\n5\n30\n45" | ~/.local/bin/dmenu -p "Pomodoro (min)")
+[ -z "$minutes" ] && exit 0
+seconds=$((minutes * 60))
+notify-send "  Pomodoro" "$minutes min started"
+sleep "$seconds"
+notify-send -u critical "  Pomodoro" "$minutes min finished!"
+paplay /usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga 2>/dev/null || true

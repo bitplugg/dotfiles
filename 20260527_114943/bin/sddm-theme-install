@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+set -e
+
+THEME_DIR="/usr/share/sddm/themes/catppuccin-mocha"
+CONFIG_DIR="/etc/sddm.conf.d"
+
+echo ":: Installing Catppuccin SDDM theme..."
+
+if [ -d "$THEME_DIR" ]; then
+    echo "Theme already installed at $THEME_DIR"
+else
+    echo ":: Downloading theme..."
+    TMPDIR=$(mktemp -d)
+    git clone --depth 1 https://github.com/catppuccin/sddm.git "$TMPDIR/sddm" 2>/dev/null
+
+    echo ":: Installing theme (sudo required)..."
+    sudo cp -r "$TMPDIR/sddm/src/catppuccin-mocha" "$THEME_DIR"
+    rm -rf "$TMPDIR"
+    echo "  Theme installed"
+fi
+
+echo ":: Configuring SDDM..."
+sudo mkdir -p "$CONFIG_DIR"
+echo -e "[Theme]\nCurrent=catppuccin-mocha" | sudo tee "$CONFIG_DIR/theme.conf" > /dev/null
+
+echo ""
+echo ":: Done! To enable SDDM, run:"
+echo "  sudo systemctl enable --now sddm"
+echo ""
+echo "  (Or disable current DM first: sudo systemctl disable --now gdm lightdm)"

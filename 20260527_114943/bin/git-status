@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Show git status of all repos
+repos=$(find /home/bitplugg -maxdepth 4 -name ".git" -type d 2>/dev/null | while read d; do echo "${d%/.git}"; done)
+[ -z "$repos" ] && notify-send "Git Status" "No git repos found" && exit 0
+output=""
+while IFS= read -r repo; do
+    cd "$repo" 2>/dev/null || continue
+    status=$(git status --short 2>/dev/null | wc -l)
+    branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+    if [ "$status" -gt 0 ]; then
+        output+=" $branch  ($status files)  $(basename "$repo")\n"
+    else
+        output+=" $branch  $(basename "$repo")\n"
+    fi
+done <<< "$repos"
+[ -z "$output" ] && output="No repos found"
+echo -e "$output" | ~/.local/bin/dmenu -p "Git Status"

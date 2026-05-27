@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# Backup configs to ~/dotfiles with timestamp
+set -e
+
+BACKUP_DIR="$HOME/dotfiles/$(date +%Y%m%d_%H%M%S)"
+mkdir -p "$BACKUP_DIR"
+
+echo "󰋔  Backing up configs to $BACKUP_DIR"
+
+# Hyprland
+cp -r "$HOME/.config/hypr" "$BACKUP_DIR/hypr"
+
+# Waybar
+cp -r "$HOME/.config/waybar" "$BACKUP_DIR/waybar"
+
+# Swaync
+cp -r "$HOME/.config/swaync" "$BACKUP_DIR/swaync"
+
+# Kitty
+cp -r "$HOME/.config/kitty" "$BACKUP_DIR/kitty"
+
+# Rofi
+cp -r "$HOME/.config/rofi" "$BACKUP_DIR/rofi"
+
+# Scripts
+cp -r "$HOME/.local/bin" "$BACKUP_DIR/bin"
+
+# Neovim
+cp -r "$HOME/.config/nvim" "$BACKUP_DIR/nvim"
+
+# Fish
+cp -r "$HOME/.config/fish" "$BACKUP_DIR/fish"
+
+# Fastfetch
+cp -r "$HOME/.config/fastfetch" "$BACKUP_DIR/fastfetch"
+
+# Hyprlock
+cp "$HOME/.config/hypr/hyprlock.conf" "$BACKUP_DIR/hyprlock.conf" 2>/dev/null || true
+
+# GTK
+cp "$HOME/.config/gtk-3.0/settings.ini" "$BACKUP_DIR/" 2>/dev/null || true
+cp "$HOME/.config/gtk-4.0/settings.ini" "$BACKUP_DIR/" 2>/dev/null || true
+
+# Wallpapers list (not the files themselves)
+ls "$HOME/Pictures/wallpapers/" > "$BACKUP_DIR/wallpapers_list.txt" 2>/dev/null || true
+
+echo "✓ Backup complete: $BACKUP_DIR"
+
+# Git: init if needed, otherwise auto-commit
+cd "$HOME/dotfiles"
+if [ ! -d ".git" ]; then
+    git init
+    git add -A
+    git commit -m "Initial backup $(date +%Y-%m-%d)"
+    echo "󰊢  Git repo initialized"
+else
+    git add -A
+    git commit -m "Backup $(date +%Y-%m-%d_%H%M%S)" --quiet 2>/dev/null || true
+    echo "󰊢  Committed to git"
+fi

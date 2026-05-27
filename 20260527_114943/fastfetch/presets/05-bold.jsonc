@@ -1,0 +1,13 @@
+{
+  "logo": { "type": "small" },
+  "display": {
+    "separator": " = ",
+    "color": { "keys": "default", "values": "dim" }
+  },
+  "modules": [
+    { "type": "title", "format": "  {3}" },
+    "os", "host", "kernel", "uptime", "packages",
+    "shell", "wm", "terminal", "cpu", "gpu", "memory", "disk",
+    { "type": "colors", "symbol": "block" }
+  ]
+}

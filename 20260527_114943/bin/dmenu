@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# dmenu wrapper — translates between rofi/wofi syntax
+LAUNCHER=$(cat "$HOME/.config/launcher.txt" 2>/dev/null || echo "rofi")
+
+case "$LAUNCHER" in
+  wofi)
+    has_show=false
+    args=()
+    while [ "$#" -gt 0 ]; do
+      case "$1" in
+        -p|--prompt) args+=("--prompt" "$2"); shift 2 ;;
+        -password|--password) args+=("--password"); shift ;;
+        -theme|--style) args+=("--style" "$2"); shift 2 ;;
+        -dmenu|--dmenu) args+=("--dmenu"); shift ;;
+        -show|--show) has_show=true; args+=("--show"); shift ;;
+        --cache-file) shift 2 ;;
+        --allow-markup) shift ;;
+        *) args+=("$1"); shift ;;
+      esac
+    done
+    if ! $has_show; then
+      exec wofi --dmenu "${args[@]}"
+    else
+      exec wofi "${args[@]}"
+    fi
+    ;;
+  rofi)
+    has_show=false
+    args=()
+    while [ "$#" -gt 0 ]; do
+      case "$1" in
+        --prompt|-p) args+=("-p" "$2"); shift 2 ;;
+        --password|-password) args+=("-password"); shift ;;
+        --style|-theme) args+=("-theme" "$2"); shift 2 ;;
+        --dmenu|-dmenu) args+=("-dmenu"); shift ;;
+        --show|-show) has_show=true; args+=("-show"); shift ;;
+        --cache-file) shift 2 ;;
+        --allow-markup) shift ;;
+        *) args+=("$1"); shift ;;
+      esac
+    done
+    if ! $has_show; then
+      exec rofi -dmenu "${args[@]}"
+    else
+      exec rofi "${args[@]}"
+    fi
+    ;;
+esac

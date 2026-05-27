@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# WiFi QR code
+SSID=$(nmcli -t -f SSID device wifi list | grep -v '^$' | sort -u | ~/.local/bin/dmenu -p "WiFi SSID")
+[ -z "$SSID" ] && exit 0
+PASSWORD=$(echo "" | ~/.local/bin/dmenu -p "Password for $SSID" -password)
+if command -v qrencode &>/dev/null; then
+  QR="WIFI:T:WPA;S:$SSID;P:$PASSWORD;;"
+  echo "$QR" | qrencode -o /tmp/wifi_qr.png -s 10 2>/dev/null
+  imv /tmp/wifi_qr.png &
+  notify-send "WiFi QR" "QR code for $SSID saved to /tmp/wifi_qr.png"
+else
+  notify-send "WiFi QR" "Install qrencode: paru -S qrencode"
+fi

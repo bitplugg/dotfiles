@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Weather from wttr.in
+data=$(curl -s "wttr.in?format=%c%t&lang=ru" 2>/dev/null)
+[ -z "$data" ] && data=" N/A"
+echo "$data"

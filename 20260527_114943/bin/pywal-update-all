@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# Update all configs with current pywal colors
+
+WAL_JSON="$HOME/.cache/wal/colors.json"
+HYPRLOCK_CONF="$HOME/.config/hypr/hyprlock.conf"
+
+if [ ! -f "$WAL_JSON" ]; then
+    echo "No pywal colors found"
+    exit 1
+fi
+
+extract() {
+    python3 -c "import json; c=json.load(open('$WAL_JSON')); print(c$1)" 2>/dev/null
+}
+
+BG=$(extract "['special']['background']" | sed 's/#//')
+FG=$(extract "['special']['foreground']" | sed 's/#//')
+C0=$(extract "['colors']['color0']" | sed 's/#//')
+C1=$(extract "['colors']['color1']" | sed 's/#//')
+C2=$(extract "['colors']['color2']" | sed 's/#//')
+C3=$(extract "['colors']['color3']" | sed 's/#//')
+C4=$(extract "['colors']['color4']" | sed 's/#//')
+C5=$(extract "['colors']['color5']" | sed 's/#//')
+C6=$(extract "['colors']['color6']" | sed 's/#//')
+C8=$(extract "['colors']['color8']" | sed 's/#//')
+
+# Update hyprlock colors
+if [ -f "$HYPRLOCK_CONF" ]; then
+    sed -i "s/^\$bg = rgba.*/\$bg = rgba(${BG}e6)/" "$HYPRLOCK_CONF"
+    sed -i "s/^\$fg = rgba.*/\$fg = rgba(${FG}ff)/" "$HYPRLOCK_CONF"
+    sed -i "s/^\$accent = rgba.*/\$accent = rgba(${C4}ff)/" "$HYPRLOCK_CONF"
+    sed -i "s/^\$error = rgba.*/\$error = rgba(${C1}ff)/" "$HYPRLOCK_CONF"
+    sed -i "s/^\$muted = rgba.*/\$muted = rgba(${C8}ff)/" "$HYPRLOCK_CONF"
+    sed -i "s/^\$surface = rgba.*/\$surface = rgba(${C0}ff)/" "$HYPRLOCK_CONF"
+    echo "hyprlock.conf updated"
+fi
+
+# Update GTK theme
+if command -v pywal-gtk-theme &>/dev/null; then
+    pywal-gtk-theme
+fi
+
+# Update rofi theme
+if command -v pywal-rofi &>/dev/null; then
+    pywal-rofi
+fi
+
+# Update swaync
+if command -v pywal-swaync &>/dev/null; then
+    pywal-swaync
+fi
+
+# Reload waybar
+pkill -USR2 waybar 2>/dev/null || (pkill waybar 2>/dev/null; sleep 0.3; waybar &)
+
+# Reload kitty
+killall -SIGUSR1 kitty 2>/dev/null || true
+
+echo "All configs updated"

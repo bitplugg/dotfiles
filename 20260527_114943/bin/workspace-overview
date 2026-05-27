@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Overview - list all workspaces and windows, switch on selection
+data=$(hyprctl workspaces -j 2>/dev/null | python3 -c "
+import json, sys
+workspaces = json.load(sys.stdin)
+for w in sorted(workspaces, key=lambda x: x.get('id', 0)):
+    wid = w.get('id', '?')
+    name = w.get('name', '') or ''
+    win_count = w.get('windows', 0)
+    icon = '󰮏' if win_count > 0 else ''
+    if name and name != str(wid):
+        label = f'{icon}  Workspace {wid} ({name}) - {win_count} windows'
+    else:
+        label = f'{icon}  Workspace {wid} - {win_count} windows'
+    print(label)
+" 2>/dev/null)
+[ -z "$data" ] && exit 0
+
+selected=$(echo "$data" | ~/.local/bin/dmenu -p "Workspace")
+[ -z "$selected" ] && exit 0
+
+ws=$(echo "$selected" | grep -oP 'Workspace \K\d+')
+[ -n "$ws" ] && hyprctl dispatch workspace "$ws"

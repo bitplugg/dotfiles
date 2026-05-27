@@ -1,0 +1,159 @@
+* {
+    bg:     #1e1e2e;
+    fg:     #cdd6f4;
+    input:  #170909;
+    blue:   #AD9A65;
+    red:    #38455F;
+    green:  #5E534D;
+    yellow: #8A7350;
+    purple: #3F5C82;
+}
+
+configuration {
+    font:                        "JetBrainsMono Nerd Font SemiBold 14";
+    show-icons:                  true;
+    display-drun:                "";
+    display-run:                 "";
+    drun-display-format:         "{name}";
+    hover-select:                true;
+    me-select-entry:             "MouseSecondary";
+    me-accept-entry:             "MousePrimary";
+}
+
+window {
+    transparency:                "real";
+    location:                    center;
+    anchor:                      center;
+    width:                       500;
+    border:                      0;
+    border-radius:               14;
+    background-color:            rgba (30, 30, 46, 90 %);
+    cursor:                      "default";
+}
+
+mainbox {
+    spacing:                     8;
+    margin:                      0;
+    padding:                     16;
+    background-color:            transparent;
+    children:                    [ "inputbar", "message", "listview" ];
+}
+
+inputbar {
+    spacing:                     8;
+    margin:                      0;
+    padding:                     10 14;
+    border-radius:               0;
+    background-color:            transparent;
+    text-color:                  @fg;
+    children:                    [ "textbox-prompt-colon", "entry", "num-filtered-rows" ];
+}
+
+textbox-prompt-colon {
+    str:                         "  ";
+    expand:                      false;
+    background-color:            transparent;
+    text-color:                  @fg;
+}
+
+entry {
+    expand:                      true;
+    placeholder:                 "Search";
+    placeholder-color:           @fg;
+    text-color:                  @fg;
+    cursor:                      "text";
+}
+
+num-filtered-rows {
+    expand:                      false;
+    text-color:                  @fg;
+    background-color:            transparent;
+}
+
+message {
+    margin:                      0;
+    padding:                     6;
+    background-color:            transparent;
+}
+
+listview {
+    spacing:                     4;
+    margin:                      8 0 0 0;
+    padding:                     0;
+    lines:                       8;
+    columns:                     1;
+    cycle:                       true;
+    dynamic:                     true;
+    scrollbar:                   false;
+    background-color:            transparent;
+}
+
+scrollbar {
+    width:                       4;
+    handle-width:                4;
+    border-radius:               2;
+    handle-color:                @blue;
+    background-color:            @input;
+}
+
+element {
+    spacing:                     4;
+    margin:                      0;
+    padding:                     2 10;
+    border-radius:               6;
+    background-color:            transparent;
+    text-color:                  @fg;
+    cursor:                      "pointer";
+}
+
+element normal.normal {
+    background-color:            transparent;
+    text-color:                  @fg;
+}
+
+element selected.normal {
+    background-color:            transparent;
+    text-color:                  @fg;
+}
+
+element-icon {
+    size:                        22;
+    margin:                      0 6 0 0;
+}
+
+element-text {
+    text-color:                  inherit;
+    vertical-align:              0.5;
+    horizontal-align:            0.0;
+}
+
+mode-switcher {
+    spacing:                     6;
+    background-color:            transparent;
+}
+
+button {
+    padding:                     6 14;
+    border-radius:               6;
+    text-color:                  @fg;
+    cursor:                      "pointer";
+}
+
+button selected {
+    background-color:            @blue;
+    text-color:                  @bg;
+}
+
+textbox {
+    padding:                     10;
+    border-radius:               8;
+    background-color:            @input;
+    text-color:                  @fg;
+}
+
+error-message {
+    padding:                     10;
+    border-radius:               8;
+    background-color:            @bg;
+    text-color:                  @fg;
+}

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Find and open projects
+dirs=$(find /home/bitplugg -maxdepth 3 -type d \( -name ".git" -o -name "*.sln" -o -name "Cargo.toml" -o -name "package.json" -o -name "go.mod" -o -name "Makefile" -o -name "CMakeLists.txt" \) 2>/dev/null | while read f; do dirname "$f"; done | sort -u)
+[ -z "$dirs" ] && dirs=$(find /home/bitplugg -maxdepth 2 -type d ! -path "*/.*" ! -name "Downloads" ! -name "Pictures" ! -name ".config" ! -name ".local" 2>/dev/null | sort -u)
+selected=$(echo "$dirs" | ~/.local/bin/dmenu -p "Project")
+[ -z "$selected" ] && exit 0
+kitty --directory "$selected" -e nvim .

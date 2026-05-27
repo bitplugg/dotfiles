@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Calculator in rofi
+RESULT=""
+while true; do
+  INPUT=$(echo "$RESULT" | ~/.local/bin/dmenu -p "Calc")
+  [ -z "$INPUT" ] && exit 0
+  RESULT=$(python3 -c "
+import math
+try:
+    r = eval('$INPUT')
+    print(r)
+except Exception as e:
+    print(f'Error: {e}')
+" 2>&1) || RESULT="Error"
+  echo -n "$RESULT" | wl-copy
+done

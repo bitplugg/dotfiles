@@ -1,0 +1,20 @@
+@theme "/home/bitplugg/.config/rofi/pywal.rasi"
+
+window {
+    width:                       540;
+}
+listview {
+    lines:                       8;
+    columns:                     2;
+    dynamic:                     true;
+}
+element {
+    padding:                     12 16;
+}
+element-icon {
+    size:                        28;
+}
+element-text {
+    vertical-align:              0.5;
+    horizontal-align:            0.0;
+}

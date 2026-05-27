@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Audio recorder with rofi control
+PID_FILE="/tmp/audio-recorder.pid"
+OUT_DIR="$HOME/Records"
+mkdir -p "$OUT_DIR"
+
+if [ -f "$PID_FILE" ] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
+    action=$(echo -e "  Stop recording" | ~/.local/bin/dmenu -p "Recording...")
+    [ -z "$action" ] && exit 0
+    kill "$(cat "$PID_FILE")" 2>/dev/null
+    rm "$PID_FILE" 2>/dev/null
+    notify-send "Audio" "Recording saved to $OUT_DIR"
+else
+    fname="$OUT_DIR/recording_$(date +%Y%m%d_%H%M%S).wav"
+    pw-record "$fname" &
+    echo $! > "$PID_FILE"
+    notify-send "Audio" "Recording started" "$fname"
+fi

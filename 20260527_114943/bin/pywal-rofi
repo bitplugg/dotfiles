@@ -1,0 +1,208 @@
+#!/usr/bin/env bash
+# Generate pywal rofi theme
+WAL="$HOME/.cache/wal/colors.json"
+ROFI_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/rofi"
+mkdir -p "$ROFI_DIR"
+
+# Force dark theme, use pywal only for accents
+BG="#1e1e2e"
+FG="#cdd6f4"
+
+if [ -f "$WAL" ]; then
+    C0=$(python3 -c "import json; c=json.load(open('$WAL')); print(c['colors']['color0'])")
+    C1=$(python3 -c "import json; c=json.load(open('$WAL')); print(c['colors']['color1'])")
+    C2=$(python3 -c "import json; c=json.load(open('$WAL')); print(c['colors']['color2'])")
+    C3=$(python3 -c "import json; c=json.load(open('$WAL')); print(c['colors']['color3'])")
+    C4=$(python3 -c "import json; c=json.load(open('$WAL')); print(c['colors']['color4'])")
+    C5=$(python3 -c "import json; c=json.load(open('$WAL')); print(c['colors']['color5'])")
+else
+    C0="#45475a"; C1="#f38ba8"; C2="#a6e3a1"; C3="#f9e2af"
+    C4="#89b4fa"; C5="#f5c2e7"
+fi
+
+cat > "$ROFI_DIR/pywal.rasi" << EOF
+* {
+    bg:     ${BG};
+    fg:     ${FG};
+    input:  ${C0};
+    blue:   ${C4};
+    red:    ${C1};
+    green:  ${C2};
+    yellow: ${C3};
+    purple: ${C5};
+}
+
+configuration {
+    font:                        "JetBrainsMono Nerd Font SemiBold 14";
+    show-icons:                  true;
+    display-drun:                "";
+    display-run:                 "";
+    drun-display-format:         "{name}";
+    hover-select:                true;
+    me-select-entry:             "MouseSecondary";
+    me-accept-entry:             "MousePrimary";
+}
+
+window {
+    transparency:                "real";
+    location:                    center;
+    anchor:                      center;
+    width:                       500;
+    border:                      0;
+    border-radius:               14;
+    background-color:            rgba (30, 30, 46, 90 %);
+    cursor:                      "default";
+}
+
+mainbox {
+    spacing:                     8;
+    margin:                      0;
+    padding:                     16;
+    background-color:            transparent;
+    children:                    [ "inputbar", "message", "listview" ];
+}
+
+inputbar {
+    spacing:                     8;
+    margin:                      0;
+    padding:                     10 14;
+    border-radius:               0;
+    background-color:            transparent;
+    text-color:                  @fg;
+    children:                    [ "textbox-prompt-colon", "entry", "num-filtered-rows" ];
+}
+
+textbox-prompt-colon {
+    str:                         "  ";
+    expand:                      false;
+    background-color:            transparent;
+    text-color:                  @fg;
+}
+
+entry {
+    expand:                      true;
+    placeholder:                 "Search";
+    placeholder-color:           @fg;
+    text-color:                  @fg;
+    cursor:                      "text";
+}
+
+num-filtered-rows {
+    expand:                      false;
+    text-color:                  @fg;
+    background-color:            transparent;
+}
+
+message {
+    margin:                      0;
+    padding:                     6;
+    background-color:            transparent;
+}
+
+listview {
+    spacing:                     4;
+    margin:                      8 0 0 0;
+    padding:                     0;
+    lines:                       8;
+    columns:                     1;
+    cycle:                       true;
+    dynamic:                     true;
+    scrollbar:                   false;
+    background-color:            transparent;
+}
+
+scrollbar {
+    width:                       4;
+    handle-width:                4;
+    border-radius:               2;
+    handle-color:                @blue;
+    background-color:            @input;
+}
+
+element {
+    spacing:                     4;
+    margin:                      0;
+    padding:                     2 10;
+    border-radius:               6;
+    background-color:            transparent;
+    text-color:                  @fg;
+    cursor:                      "pointer";
+}
+
+element normal.normal {
+    background-color:            transparent;
+    text-color:                  @fg;
+}
+
+element selected.normal {
+    background-color:            transparent;
+    text-color:                  @fg;
+}
+
+element-icon {
+    size:                        22;
+    margin:                      0 6 0 0;
+}
+
+element-text {
+    text-color:                  inherit;
+    vertical-align:              0.5;
+    horizontal-align:            0.0;
+}
+
+mode-switcher {
+    spacing:                     6;
+    background-color:            transparent;
+}
+
+button {
+    padding:                     6 14;
+    border-radius:               6;
+    text-color:                  @fg;
+    cursor:                      "pointer";
+}
+
+button selected {
+    background-color:            @blue;
+    text-color:                  @bg;
+}
+
+textbox {
+    padding:                     10;
+    border-radius:               8;
+    background-color:            @input;
+    text-color:                  @fg;
+}
+
+error-message {
+    padding:                     10;
+    border-radius:               8;
+    background-color:            @bg;
+    text-color:                  @fg;
+}
+EOF
+
+cat > "$ROFI_DIR/drun.rasi" << EOF
+@theme "$ROFI_DIR/pywal.rasi"
+
+window {
+    width:                       540;
+}
+listview {
+    lines:                       8;
+    columns:                     2;
+    dynamic:                     true;
+}
+element {
+    padding:                     12 16;
+}
+element-icon {
+    size:                        28;
+}
+element-text {
+    vertical-align:              0.5;
+    horizontal-align:            0.0;
+}
+EOF
+
+echo "Rofi theme updated"

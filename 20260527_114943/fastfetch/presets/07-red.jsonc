@@ -1,0 +1,19 @@
+{
+  "logo": { "type": "small", "color": { "1": "red" } },
+  "display": {
+    "separator": " → ",
+    "color": { "keys": "red", "values": "white" }
+  },
+  "modules": [
+    { "type": "title", "format": "{6}{3}{reset}@{7}{4}" },
+    "separator",
+    "os", "kernel", "uptime",
+    { "type": "packages", "key": "" },
+    { "type": "shell", "key": "" },
+    { "type": "wm", "key": "" },
+    { "type": "terminal", "key": "" },
+    { "type": "cpu", "key": "" },
+    { "type": "memory", "key": "" },
+    { "type": "colors", "symbol": "block" }
+  ]
+}

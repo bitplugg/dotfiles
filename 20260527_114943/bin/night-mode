@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Toggle night mode (wlsunset)
+PID_FILE="/tmp/wlsunset.pid"
+if [ -f "$PID_FILE" ] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
+    kill "$(cat "$PID_FILE")" 2>/dev/null
+    rm "$PID_FILE"
+    notify-send "Night mode" "Disabled"
+else
+    wlsunset -l 55.7 -e 37.6 -t 3000 -T 6500 &
+    echo $! > "$PID_FILE"
+    notify-send "Night mode" "Enabled (3000K)"
+fi

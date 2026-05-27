@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Power menu via rofi
+
+entries=(
+    "  Shutdown"
+    "  Reboot"
+    "  Suspend"
+    "  Lock"
+    "  Logout"
+    "  Cancel"
+)
+
+CHOSEN=$(printf '%s\n' "${entries[@]}" | ~/.local/bin/dmenu -p "Power")
+
+case "$CHOSEN" in
+    *Shutdown*)   systemctl poweroff ;;
+    *Reboot*)     systemctl reboot ;;
+    *Suspend*)    systemctl suspend ;;
+    *Lock*)       hyprlock ;;
+    *Logout*)     hyprctl dispatch exit ;;
+    *)            exit 0 ;;
+esac

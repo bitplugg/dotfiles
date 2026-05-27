@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+USER="bitplugg"
+
+load=$(/usr/bin/awk '{printf "%.2f", $1}' /proc/loadavg)
+ram=$(/usr/bin/free -h | /usr/bin/awk '/Mem:/ {print $3"/"$2}')
+wifi_link=$(/usr/bin/awk '/wlan0/ {print $3}' /proc/net/wireless 2>/dev/null | /usr/bin/tr -d '.')
+vol=$(/usr/bin/wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null | /usr/bin/awk '{print int($2*100)}')
+music=$(playerctl metadata --format '{{artist}} — {{title}}' 2>/dev/null | head -c 50)
+weather=$(curl -s "wttr.in/?format=%C+%t" 2>/dev/null | head -c 30)
+
+[ -z "$vol" ] && vol=0
+if [ -n "$wifi_link" ]; then
+    wifi_str=" $wifi_link%"
+else
+    wifi_str="󰤮 Off"
+fi
+
+echo "Привет, $USER!"
+echo "󰅐 Load: $load   RAM: $ram  $wifi_str   $vol%"
+[ -n "$weather" ] && echo "󰖐 $weather"
+[ -n "$music" ] && echo " $music"

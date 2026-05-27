@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# swaync doesn't need color updates — it uses @import in CSS directly.
+# Just reload to pick up new colors.
+swaync-client --reload-css 2>/dev/null || true
+echo "swaync styles reloaded"

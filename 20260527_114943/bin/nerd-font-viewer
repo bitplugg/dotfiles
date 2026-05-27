@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+# Nerd Font icon viewer — rofi
+ICONS=" Check
+ Cross
+ Cog
+ Lock
+ Refresh
+ Search
+ Terminal
+ Edit
+ Play
+ Stop
+ Check
+ Plus
+ Minus
+ Warning
+ Shield
+ Flag
+ Calendar
+ Clock
+ Github
+ Key
+ Tag
+ User
+ Envelope
+ Home
+ Image
+ Camera
+ Save
+ List
+ Heart
+ Bolt
+ Lightbulb
+ Share
+ Download
+ Upload
+ Rocket
+ Code
+ Bug
+ Branch
+ Commit
+ Play
+ Spotify
+ File
+ Text
+ Image
+ Music
+ Video
+ Book
+ Heart
+ Lock
+ Unlock
+ Moon
+ Sun
+ Bell
+ Bell off
+ Volume
+ Vol up
+ Vol down
+ Mute
+ Headphones
+ Trash
+ Pencil
+ Close
+ Apple
+ Linux
+ Package
+ Wifi
+ Bluetooth
+ Battery
+ Charging
+ Server
+ Printer
+ Keyboard
+ Mouse
+ Database
+ Pull req
+ Merge
+ Git
+ Microphone
+ Mic off
+ Video
+ Vid off
+ Eye
+ Eye off
+ Fork
+ Branch
+ Puzzle
+ Archive
+ Folder open
+ Folder plus
+ Folder tree
+ Copy
+ Clipboard
+ List
+ Check
+ Palette
+ Bucket
+ Dropper
+ Brush
+ Layers
+ Layers off
+ Compass
+ Map
+ Map pin
+ Clock
+ Alarm
+ Hourglass
+ History
+ Calendar
+ Star
+ Plus
+ Minus
+ Check
+ Badge
+ Badge ok
+ Badge +
+ Badge -"
+
+SELECTED=$(echo "$ICONS" | ~/.local/bin/dmenu -p "Nerd Icons" -theme-str 'listview {columns: 3;}')
+[ -z "$SELECTED" ] && exit 0
+ICON=$(echo "$SELECTED" | awk '{print $1}')
+NAME=$(echo "$SELECTED" | cut -d' ' -f2-)
+echo -n "$ICON" | wl-copy
+notify-send "Nerd Icon" "Copied: $ICON ($NAME)"

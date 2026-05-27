@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+import json, os, subprocess, sys
+from pathlib import Path
+
+wal_file = Path.home() / ".cache" / "wal" / "colors.json"
+colors = {
+    "bg": "#1e1e2e", "fg": "#cdd6f4",
+    "c0": "#45475a", "c1": "#f38ba8", "c2": "#a6e3a1",
+    "c3": "#f9e2af", "c4": "#89b4fa", "c5": "#f5c2e7",
+    "c6": "#94e2d5", "c7": "#bac2de", "c8": "#585b70",
+}
+if wal_file.exists():
+    try:
+        w = json.loads(wal_file.read_text())
+        colors = {
+            "bg": w["special"]["background"],
+            "fg": w["special"]["foreground"],
+            "c0": w["colors"]["color0"], "c1": w["colors"]["color1"],
+            "c2": w["colors"]["color2"], "c3": w["colors"]["color3"],
+            "c4": w["colors"]["color4"], "c5": w["colors"]["color5"],
+            "c6": w["colors"]["color6"], "c7": w["colors"]["color7"],
+            "c8": w["colors"]["color8"],
+        }
+    except:
+        pass
+
+c = colors
+n = chr
+
+config = {
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/master/doc/json_schema.json",
+    "logo": {"type": "small", "color": {"1": c["c4"]}},
+    "display": {
+        "separator": f" {n(0xe0b1)} ",
+        "color": {"title": c["c4"], "keys": c["c3"], "separator": c["c8"]}
+    },
+    "modules": [
+        "title", "separator",
+        {"type": "os", "key": f" {n(0xf17c)}  OS", "keyColor": c["c6"]},
+        {"type": "host", "key": f" {n(0xf0222)}  Host", "keyColor": c["c4"]},
+        {"type": "kernel", "key": f" {n(0xf013)}  Kernel", "keyColor": c["c5"]},
+        {"type": "uptime", "key": f" {n(0xf017)}  Uptime", "keyColor": c["c2"]},
+        {"type": "packages", "key": f" {n(0xf147)}  Packages", "keyColor": c["c3"]},
+        {"type": "shell", "key": f" {n(0xe6d1)}  Shell", "keyColor": c["c6"]},
+        {"type": "wm", "key": f" {n(0xf0b0)}  WM", "keyColor": c["c4"]},
+        {"type": "terminal", "key": f" {n(0xf109)}  Terminal", "keyColor": c["c2"]},
+        {"type": "cpu", "key": f" {n(0xf2db)}  CPU", "keyColor": c["c3"]},
+        {"type": "gpu", "key": f" {n(0xf03e2)}  GPU", "keyColor": c["c6"]},
+        {"type": "memory", "key": f" {n(0xf0c3)}  Memory", "keyColor": c["c4"]},
+        {"type": "disk", "key": f" {n(0xf0a0)}  Disk", "keyColor": c["c5"]},
+        "break",
+        {"type": "colors", "symbol": "circle"},
+    ]
+}
+
+tmp = Path.home() / ".cache" / "fastfetch-pywal.jsonc"
+tmp.parent.mkdir(parents=True, exist_ok=True)
+tmp.write_text(json.dumps(config, indent=2))
+subprocess.run(["fastfetch", "--config", str(tmp)], stdin=sys.stdin)
+tmp.unlink(missing_ok=True)

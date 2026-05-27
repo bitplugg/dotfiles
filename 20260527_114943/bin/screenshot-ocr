@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Screenshot region → OCR → clipboard
+tmp=$(mktemp /tmp/screenshot-XXXXXX.png)
+hyprshot -m region -o /tmp -f "$(basename "$tmp")" 2>/dev/null
+[ ! -f "$tmp" ] && exit 1
+text=$(tesseract "$tmp" stdout -l rus+eng 2>/dev/null | tr '\n' ' ' | sed 's/  */ /g')
+rm "$tmp"
+if [ -n "$text" ]; then
+    echo "$text" | wl-copy
+    notify-send "OCR" "Text copied to clipboard" "$(echo "$text" | head -c 100)"
+else
+    notify-send "OCR" "No text found"
+fi

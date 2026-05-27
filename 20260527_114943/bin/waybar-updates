@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Check for pacman updates
+updates=$(checkupdates 2>/dev/null | wc -l)
+aur_updates=$(paru -Qum 2>/dev/null | wc -l)
+total=$((updates + aur_updates))
+echo "$total"

@@ -1,0 +1,20 @@
+{
+  "logo": { "type": "small", "color": { "1": "blue" } },
+  "display": {
+    "separator": " ─ ",
+    "color": { "keys": "cyan", "values": "default" }
+  },
+  "modules": [
+    { "type": "title", "format": "{6}{3}@{7}{4}{reset} " },
+    { "type": "os", "key": "", "keyColor": "cyan" },
+    { "type": "kernel", "key": "", "keyColor": "blue" },
+    { "type": "uptime", "key": "", "keyColor": "green" },
+    { "type": "packages", "key": "", "keyColor": "yellow" },
+    { "type": "shell", "key": "", "keyColor": "magenta" },
+    { "type": "wm", "key": "", "keyColor": "cyan" },
+    { "type": "terminal", "key": "", "keyColor": "blue" },
+    { "type": "cpu", "key": "", "keyColor": "green" },
+    { "type": "memory", "key": "", "keyColor": "yellow" },
+    { "type": "colors", "symbol": "circle" }
+  ]
+}

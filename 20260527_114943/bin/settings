@@ -1,0 +1,255 @@
+#!/usr/bin/env python3
+import json
+import os
+import subprocess
+import tkinter as tk
+from tkinter import ttk, colorchooser
+
+HOME = os.path.expanduser("~")
+WAL_JSON = f"{HOME}/.cache/wal/colors.json"
+
+def wal_color(name):
+    try:
+        with open(WAL_JSON) as f:
+            c = json.load(f)
+        return c["colors"][name].lstrip("#")
+    except:
+        return "1e1e2e" if "bg" in name else "cdd6f4"
+
+class SettingsApp:
+    def __init__(self):
+        self.root = tk.Tk(className="Settings")
+        self.root.title("Settings")
+        self.root.geometry("700x500")
+        self.root.resizable(False, False)
+        self.root.after(200, self._float_window)
+
+        self.bg = "#" + wal_color("color0")
+        self.fg = "#" + wal_color("color7")
+        self.accent = "#" + wal_color("color4")
+        self.root.configure(bg=self.bg)
+
+        style = ttk.Style()
+        style.theme_use("clam")
+        style.configure("TNotebook", background=self.bg, borderwidth=0)
+        style.configure("TNotebook.Tab", background=self.bg, foreground=self.fg, padding=[12, 4])
+        style.map("TNotebook.Tab", background=[("selected", self.accent)], foreground=[("selected", "#000000")])
+        style.configure("TFrame", background=self.bg)
+        style.configure("TLabel", background=self.bg, foreground=self.fg, font=("JetBrainsMono Nerd Font", 11))
+        style.configure("TButton", background=self.accent, foreground="#000000", font=("JetBrainsMono Nerd Font", 10), borderwidth=0)
+        style.map("TButton", background=[("active", "#" + wal_color("color6"))])
+        style.configure("TScale", background=self.bg, troughcolor="#333333")
+        style.configure("TCheckbutton", background=self.bg, foreground=self.fg, font=("JetBrainsMono Nerd Font", 11))
+
+        notebook = ttk.Notebook(self.root)
+        notebook.pack(fill="both", expand=True, padx=10, pady=10)
+
+        self.page_theme(notebook)
+        self.page_display(notebook)
+        self.page_audio(notebook)
+        self.page_power(notebook)
+        self.page_info(notebook)
+
+        self.root.mainloop()
+
+    def add_page(self, notebook, title):
+        frame = ttk.Frame(notebook)
+        notebook.add(frame, text=title)
+        return frame
+
+    def btn(self, parent, text, cmd):
+        b = ttk.Button(parent, text=text, command=cmd)
+        b.pack(pady=4)
+        return b
+
+    def _float_window(self):
+        try:
+            addr = subprocess.getoutput("hyprctl activewindow -j | python3 -c \"import json,sys; print(json.load(sys.stdin).get('address',''))\"")
+            if addr:
+                subprocess.run(f"hyprctl dispatch setfloating address:{addr}", shell=True, capture_output=True)
+                subprocess.run(f"hyprctl dispatch centerwindow address:{addr}", shell=True, capture_output=True)
+                subprocess.run(f"hyprctl dispatch resizewindowpixel exact 700 500,address:{addr}", shell=True, capture_output=True)
+        except:
+            pass
+
+    def page_theme(self, notebook):
+        f = self.add_page(notebook, "    Theme  ")
+
+        ttk.Label(f, text="Wallpaper").pack(pady=(12, 2))
+        ttk.Button(f, text="    Change wallpaper", command=lambda: run("kitty ~/.local/bin/wallpaper")).pack(pady=2)
+
+        ttk.Label(f, text="Pywal colors").pack(pady=(12, 2))
+        ttk.Button(f, text="    Regenerate colors", command=lambda: run("~/.local/bin/pywal-update-all")).pack(pady=2)
+
+        ttk.Label(f, text="GTK Theme").pack(pady=(12, 2))
+        ttk.Button(f, text="    nwg-look (GTK settings)", command=lambda: run("nwg-look")).pack(pady=2)
+
+        ttk.Label(f, text="App Launcher").pack(pady=(12, 2))
+        launcher = tk.StringVar(value=get_launcher())
+        lf = ttk.Frame(f)
+        lf.pack()
+        ttk.Radiobutton(lf, text="    wofi", variable=launcher, value="wofi",
+            command=lambda: set_launcher(launcher.get())).pack(side="left", padx=8)
+        ttk.Radiobutton(lf, text="    rofi", variable=launcher, value="rofi",
+            command=lambda: set_launcher(launcher.get())).pack(side="left", padx=8)
+
+        ttk.Label(f, text="Font size").pack(pady=(12, 2))
+        fs_frame = ttk.Frame(f)
+        fs_frame.pack()
+        ttk.Button(fs_frame, text="  +  ", command=lambda: change_font(1)).pack(side="left", padx=4)
+        ttk.Button(fs_frame, text="  -  ", command=lambda: change_font(-1)).pack(side="left", padx=4)
+
+    def page_display(self, notebook):
+        f = self.add_page(notebook, "    Display  ")
+
+        ttk.Label(f, text="Brightness").pack(pady=(12, 2))
+        bright = tk.DoubleVar(value=get_brightness())
+        scale = ttk.Scale(f, from_=1, to=100, variable=bright, command=lambda v: set_brightness(int(float(v))))
+        scale.pack(fill="x", padx=40, pady=4)
+        lbl = ttk.Label(f, textvariable=bright)
+        lbl.pack()
+
+        ttk.Label(f, text="Blur (hyprlock)").pack(pady=(12, 2))
+        self.btn(f, "    Toggle blur", lambda: toggle_blur())
+
+        ttk.Label(f, text="Animations").pack(pady=(12, 2))
+        self.btn(f, "  ﱿ  Toggle animations", lambda: toggle_animations())
+
+    def page_audio(self, notebook):
+        f = self.add_page(notebook, "    Audio  ")
+
+        ttk.Label(f, text="Volume").pack(pady=(12, 2))
+        vol = tk.DoubleVar(value=get_volume())
+        scale = ttk.Scale(f, from_=0, to=150, variable=vol, command=lambda v: set_volume(int(float(v))))
+        scale.pack(fill="x", padx=40, pady=4)
+        lbl = ttk.Label(f, textvariable=vol)
+        lbl.pack()
+
+        ttk.Label(f, text="Output").pack(pady=(12, 2))
+        self.btn(f, "    Toggle mute", lambda: run("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle && notify-send 'Audio' 'Mute toggled'"))
+
+    def page_power(self, notebook):
+        f = self.add_page(notebook, "    Power  ")
+
+        ttk.Label(f, text="Idle timeout").pack(pady=(12, 2))
+        self.btn(f, "    Edit hypridle.conf", lambda: run(f"kitty -e nvim {HOME}/.config/hypr/hypridle.conf"))
+
+        ttk.Label(f, text="Auto-suspend").pack(pady=(12, 2))
+        self.btn(f, "    Toggle idle inhibit", lambda: run(f"{HOME}/.local/bin/idle-inhibit"))
+
+        ttk.Label(f, text="Session").pack(pady=(12, 2))
+        self.btn(f, "    Lock screen", lambda: run("hyprlock"))
+        bf = ttk.Frame(f)
+        bf.pack(pady=4)
+        ttk.Button(bf, text="    Reboot  ", command=lambda: run("systemctl reboot")).pack(side="left", padx=4)
+        ttk.Button(bf, text="    Shutdown  ", command=lambda: run("systemctl poweroff")).pack(side="left", padx=4)
+
+    def page_info(self, notebook):
+        f = self.add_page(notebook, "    Info  ")
+        info = subprocess.getoutput("fastfetch --pipe -s title -s os -s kernel -s uptime -s packages -s shell -s de -s theme -s icons -s font -s gpu -s cpu -s memory 2>/dev/null | head -20")
+        text = tk.Text(f, wrap="word", bg=self.bg, fg=self.fg, font=("JetBrainsMono Nerd Font", 10), relief="flat", bd=0, padx=10, pady=10)
+        text.insert("1.0", info)
+        text.configure(state="disabled")
+        text.pack(fill="both", expand=True, padx=10, pady=10)
+
+def run(cmd):
+    subprocess.Popen(f"exec {cmd}", shell=True)
+
+def get_launcher():
+    try:
+        with open(f"{HOME}/.config/launcher.txt") as f:
+            return f.read().strip()
+    except:
+        return "rofi"
+
+def set_launcher(choice):
+    try:
+        with open(f"{HOME}/.config/launcher.txt", "w") as f:
+            f.write(choice)
+        subprocess.run(["hyprctl", "reload"], capture_output=True)
+        notify_send("Launcher", f"Switched to {choice}")
+    except Exception as e:
+        notify_send("Error", str(e))
+        subprocess.run(["hyprctl", "reload"], capture_output=True)
+        notify_send("Launcher", f"Switched to {choice}")
+    except Exception as e:
+        notify_send("Error", str(e))
+
+def get_brightness():
+    try:
+        out = subprocess.getoutput("brightnessctl get")
+        max_ = subprocess.getoutput("brightnessctl max")
+        if max_ and max_.isdigit() and int(max_) > 0:
+            return int(int(out) / int(max_) * 100)
+    except:
+        pass
+    return 80
+
+def set_volume(v):
+    subprocess.run(f"wpctl set-volume @DEFAULT_AUDIO_SINK@ {v}%", shell=True)
+
+def get_volume():
+    try:
+        out = subprocess.getoutput("wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{print $2*100}'")
+        return int(float(out))
+    except:
+        return 50
+
+def set_brightness(v):
+    subprocess.run(f"brightnessctl set {v}% && swayosd-client --brightness {v}", shell=True)
+
+def change_font(delta):
+    kitty = f"{HOME}/.config/kitty/kitty.conf"
+    try:
+        with open(kitty) as f:
+            lines = f.readlines()
+        for i, line in enumerate(lines):
+            if line.startswith("font_size "):
+                size = float(line.split()[1])
+                new_size = max(8, size + delta)
+                lines[i] = f"font_size {new_size}\n"
+                break
+        with open(kitty, "w") as f:
+            f.writelines(lines)
+        subprocess.run(["killall", "-SIGUSR1", "kitty"], capture_output=True)
+        notify_send("Font size", f"Kitty font: {new_size}")
+    except:
+        pass
+
+def toggle_blur():
+    hypr = f"{HOME}/.config/hypr/hyprlock.conf"
+    try:
+        with open(hypr) as f:
+            c = f.read()
+        if "blur_passes = 0" in c:
+            c = c.replace("blur_passes = 0", "blur_passes = 4")
+            notify_send("Blur", "Enabled")
+        else:
+            c = c.replace("blur_passes = 4", "blur_passes = 0")
+            notify_send("Blur", "Disabled")
+        with open(hypr, "w") as f:
+            f.write(c)
+    except:
+        pass
+
+def toggle_animations():
+    anim = f"{HOME}/.config/hypr/animations.conf"
+    try:
+        with open(anim) as f:
+            c = f.read()
+        if "enabled = true" in c:
+            c = c.replace("enabled = true", "enabled = false")
+            notify_send("Animations", "Disabled")
+        else:
+            c = c.replace("enabled = false", "enabled = true")
+            notify_send("Animations", "Enabled")
+        with open(anim, "w") as f:
+            f.write(c)
+    except:
+        pass
+
+def notify_send(title, msg):
+    subprocess.run(["notify-send", title, msg], capture_output=True)
+
+if __name__ == "__main__":
+    SettingsApp()
