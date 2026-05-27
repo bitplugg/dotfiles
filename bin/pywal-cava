@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+WAL="$HOME/.cache/wal/colors.json"
+CAVA_CONF="$HOME/.config/cava/config"
+
+if [ ! -f "$WAL" ]; then exit 0; fi
+
+BG=$(python3 -c "import json; c=json.load(open('$WAL')); print(c['special']['background'])" 2>/dev/null)
+C1=$(python3 -c "import json; c=json.load(open('$WAL')); print(c['colors']['color1'])" 2>/dev/null)
+C2=$(python3 -c "import json; c=json.load(open('$WAL')); print(c['colors']['color2'])" 2>/dev/null)
+C3=$(python3 -c "import json; c=json.load(open('$WAL')); print(c['colors']['color3'])" 2>/dev/null)
+C4=$(python3 -c "import json; c=json.load(open('$WAL')); print(c['colors']['color4'])" 2>/dev/null)
+C5=$(python3 -c "import json; c=json.load(open('$WAL')); print(c['colors']['color5'])" 2>/dev/null)
+C6=$(python3 -c "import json; c=json.load(open('$WAL')); print(c['colors']['color6'])" 2>/dev/null)
+C7=$(python3 -c "import json; c=json.load(open('$WAL')); print(c['colors']['color7'])" 2>/dev/null)
+
+sed -i "s/^background = .*/background = '$BG'/" "$CAVA_CONF"
+
+sed -i "s/^gradient_color_1 = .*/gradient_color_1 = '$C1'/" "$CAVA_CONF"
+sed -i "s/^gradient_color_2 = .*/gradient_color_2 = '$C2'/" "$CAVA_CONF"
+sed -i "s/^gradient_color_3 = .*/gradient_color_3 = '$C3'/" "$CAVA_CONF"
+sed -i "s/^gradient_color_4 = .*/gradient_color_4 = '$C4'/" "$CAVA_CONF"
+sed -i "s/^gradient_color_5 = .*/gradient_color_5 = '$C5'/" "$CAVA_CONF"
+sed -i "s/^gradient_color_6 = .*/gradient_color_6 = '$C6'/" "$CAVA_CONF"
+sed -i "s/^gradient_color_7 = .*/gradient_color_7 = '$C7'/" "$CAVA_CONF"
+sed -i "s/^gradient_color_8 = .*/gradient_color_8 = '$C1'/" "$CAVA_CONF"
+
+echo "cava theme updated"

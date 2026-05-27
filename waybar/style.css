@@ -209,6 +209,24 @@ window#waybar > box {
     font-size: 14px;
 }
 
+#custom-cava {
+    background: alpha(@background, 0.75);
+    border-radius: 8px;
+    padding: 2px 8px;
+    margin: 0 4px;
+    color: @color2;
+    font-size: 14px;
+}
+
+#custom-ags {
+    background: alpha(@background, 0.75);
+    border-radius: 8px;
+    padding: 2px 8px;
+    margin: 0 4px;
+    font-size: 13px;
+    color: @color6;
+}
+
 #custom-updates {
     background: alpha(@background, 0.75);
     border-radius: 8px;

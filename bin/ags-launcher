@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Launcher/manager for AGS (Aylur's Widget Suite)
+ACTION="${1:-toggle}"
+
+case "$ACTION" in
+    start)
+        if pgrep -x ags > /dev/null; then
+            echo "AGS already running"
+        else
+            cd ~/.config/ags && ags run app.tsx &
+            disown
+        fi
+        ;;
+    stop)
+        ags quit 2>/dev/null || pkill -x ags 2>/dev/null || true
+        ;;
+    restart)
+        ags quit 2>/dev/null || pkill -x ags 2>/dev/null || true
+        sleep 0.5
+        cd ~/.config/ags && ags run app.tsx &
+        disown
+        ;;
+    toggle)
+        if pgrep -x ags > /dev/null; then
+            exec "$0" stop
+        else
+            exec "$0" start
+        fi
+        ;;
+    status)
+        if pgrep -x ags > /dev/null; then
+            echo " AGS: running"
+        else
+            echo " AGS: stopped"
+        fi
+        ;;
+    *)
+        echo "Usage: ags-launcher {start|stop|restart|toggle|status}"
+        exit 1
+        ;;
+esac

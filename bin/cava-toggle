@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Toggle cava in a floating kitty window
+WINDOW_TITLE="cava-visualizer"
+
+# Check if cava is already running in a kitty window
+if pgrep -f "kitty.*--title.*$WINDOW_TITLE" > /dev/null; then
+    pkill -f "cava" 2>/dev/null
+    exit 0
+fi
+
+# Launch cava in a floating kitty window
+kitty --title "$WINDOW_TITLE" \
+    --class "$WINDOW_TITLE" \
+    --config /dev/null \
+    -o background_opacity=0.7 \
+    -o hide_window_decorations=yes \
+    -o font_size=6 \
+    -o window_padding_width=0 \
+    -e cava

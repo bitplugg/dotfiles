@@ -4,7 +4,7 @@
     "margin-top": 6,
     "margin-left": 6,
     "margin-right": 6,
-    "modules-left": ["custom/launcher", "hyprland/workspaces", "custom/idleinhibitor", "custom/colorpicker", "custom/updates", "cpu", "memory", "custom/weather"],
+    "modules-left": ["custom/launcher", "hyprland/workspaces", "custom/idleinhibitor", "custom/colorpicker", "custom/cava", "custom/ags", "custom/updates", "cpu", "memory", "custom/weather"],
     "modules-center": ["hyprland/window", "custom/media"],
     "modules-right": ["pulseaudio", "custom/mic", "custom/nightmode", "network", "bluetooth", "battery", "clock", "tray", "custom/power"],
     "hyprland/workspaces": {
@@ -124,6 +124,19 @@
     "custom/colorpicker": {
         "format": "",
         "on-click": "~/.local/bin/waybar-colorpicker",
+        "tooltip": false
+    },
+    "custom/cava": {
+        "format": "",
+        "on-click": "~/.local/bin/cava-toggle",
+        "tooltip": false
+    },
+    "custom/ags": {
+        "exec": "~/.local/bin/ags-launcher status",
+        "interval": 30,
+        "signal": 5,
+        "format": "{}",
+        "on-click": "~/.local/bin/ags-launcher toggle",
         "tooltip": false
     },
     "custom/updates": {

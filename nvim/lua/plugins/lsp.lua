@@ -14,6 +14,9 @@ return {
                 "lua_ls", "pyright", "rust_analyzer",
                 "ts_ls", "html", "cssls",
                 "jsonls", "yamlls",
+                "bashls", "dockerls", "marksman",
+                "sqlls", "tailwindcss", "eslint",
+                "graphql", "emmet_ls", "prismals",
             },
         },
     },
@@ -29,6 +32,9 @@ return {
                 "lua_ls", "pyright", "rust_analyzer",
                 "ts_ls", "html", "cssls",
                 "jsonls", "yamlls",
+                "bashls", "dockerls", "marksman",
+                "sqlls", "tailwindcss", "eslint",
+                "graphql", "emmet_ls", "prismals",
             }
 
             for _, server in ipairs(servers) do
