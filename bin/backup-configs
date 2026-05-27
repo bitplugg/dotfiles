@@ -28,8 +28,11 @@ cp -r "$HOME/.local/bin" "$BACKUP_DIR/bin"
 # Neovim
 cp -r "$HOME/.config/nvim" "$BACKUP_DIR/nvim"
 
-# Fish
+# Fish (mask API key)
 cp -r "$HOME/.config/fish" "$BACKUP_DIR/fish"
+if [ -f "$BACKUP_DIR/fish/config.fish" ]; then
+  sed -i "s/MISTRAL_API_KEY '.*'/MISTRAL_API_KEY '***'/g" "$BACKUP_DIR/fish/config.fish"
+fi
 
 # Fastfetch
 cp -r "$HOME/.config/fastfetch" "$BACKUP_DIR/fastfetch"
