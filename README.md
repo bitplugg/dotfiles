@@ -26,7 +26,7 @@
 | **AI Gateway** | OpenClaw | Mistral AI + Telegram бот @openpluh_bot |
 | **Audio Viz** | Cava | Аудио-визуализатор в плавающем kitty |
 | **Widget Suite** | AGS (Aylur's GTK Shell) | GTK4/TypeScript бары и виджеты |
-| **Wallpaper Picker** | AGS (GTK4) | Выбор обоев через GUI с миниатюрами |
+| **Wallpaper Picker** | fzf + chafa | Выбор обоев через терминал с превью |
 | **Colors** | pywal16 | Авто-генерация цветов от обоев |
 | **Wallpaper** | Awww | Плавная смена обоев |
 | **Screen Lock** | Hyprlock | Блокировка с информацией и погодой |
@@ -126,8 +126,13 @@
 ### 🧩 AGS (Aylur's Widget Suite)
 - Собран из исходников v3.1.0
 - Бар: часы, дата, логотип 
-- Wallpaper Picker: сетка миниатюр, Random, Close
-- Хоткей `Super+A` для бара, `Super+W` для пикера
+- Хоткей `Super+A` для бара
+
+### 🖼️ Wallpaper Picker (fzf + chafa)
+- Выбор обоев через плавающий Kitty терминал
+- Превью изображений через `chafa --symbols block`
+- Выбранные обои применяются через `wallpaper` (awww/swww + pywal)
+- Хоткей `Super+W`
 
 ### 🤖 OpenClaw (AI Gateway)
 - Mistral AI (mistral-large-latest) через API ключ
@@ -254,7 +259,7 @@ pywal-update-all
 ├── cava/config             # Аудио-визуализатор
 ├── ags/
 │   ├── app.tsx             # Бар AGS (часы/дата)
-│   └── wallpaper-picker.tsx # Выбор обоев
+│   └── wallpaper-picker.tsx # AGS пикер (заменён на терминальный)
 ├── gtk-3.0/settings.ini    # GTK настройки
 ├── autostart/blueman.desktop
 └── launcher.txt            # "wofi" или "rofi"
@@ -263,7 +268,8 @@ pywal-update-all
 ├── dmenu                   # Враппер для wofi/rofi
 ├── appmenu                 # Враппер лаунчера
 ├── wallpaper               # Установка обоев + pywal
-├── wallpaper-picker        # AGS GUI для обоев
+├── wallpaper-pick          # Выбор обоев (fzf + chafa)
+├── wallpaper-picker        # AGS GUI для обоев (заменён)
 ├── pywal-update-all        # Обновление всех тем
 ├── pywal-rofi              # Генератор темы rofi
 ├── pywal-gtk-theme         # Генератор GTK темы
@@ -333,7 +339,7 @@ pywal-update-all
 |---------|----------|
 | `Super+R` или `Super+D` | App launcher (rofi/wofi) |
 | `Super+E` | Neo-tree (файловое дерево) |
-| `Super+W` | Wallpaper picker (AGS) |
+| `Super+W` | Wallpaper picker (fzf + chafa в плавающем Kitty) |
 | `Super+A` | AGS bar toggle |
 | `Super+S` | Settings app |
 | `Super+O` | OpenClaw лаунчер |
@@ -406,7 +412,8 @@ pywal-update-all
 ### Как это работает
 
 ```
-Смена обоев (Super+W или wallpaper-picker)
+Смена обоев (Super+W → wallpaper-pick → fzf + chafa)
+  → wallpaper /path/to/file
   → awww img (плавная смена)
   → wal -i (генерация pywal цветов)
   → pywal-update-all:
@@ -582,7 +589,8 @@ ls /sys/class/power_supply/
 |--------|-----------|--------|
 | `wallpaper <file>` | Установить обои + pywal | — |
 | `wallpaper --random` | Случайные обои | — |
-| `wallpaper-picker` | GUI выбор обоев (AGS) | `Super+W` |
+| `wallpaper-pick` | Выбор обоев (fzf + chafa в плавающем Kitty) | `Super+W` |
+| `wallpaper-picker` | AGS GUI (старый, заменён на wallpaper-pick) | — |
 | `pywal-update-all` | Обновить все темы | — |
 | `cava-toggle` | Cava в плавающем kitty | `Super+C` |
 | `ags-launcher` | Управление AGS баром | `Super+A` |
@@ -638,7 +646,9 @@ openclaw searxng-git
 ## 🧠 Система автоматизации
 
 ```
-Смена обоев
+Смена обоев (Super+W)
+  → wallpaper-pick (fzf + chafa выбор)
+  → wallpaper /path (awww/swww + pywal)
   → pywal (генерация цветов)
   → pywal-update-all (применение ко всем компонентам)
   → pkill waybar + waybar (перезапуск)
