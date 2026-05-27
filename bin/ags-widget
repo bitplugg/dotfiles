@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# Toggle AGS widgets
+INSTANCE="ags-widgets"
+CMD="${1:-help}"
+
+toggle() {
+    if ags list 2>/dev/null | grep -q "$INSTANCE"; then
+        if [ -n "$1" ]; then
+            ags toggle "$INSTANCE" "$1" 2>/dev/null || ags request "$INSTANCE" "window('$1', { visible: 'toggle' })" 2>/dev/null
+        else
+            ags quit "$INSTANCE" 2>/dev/null
+        fi
+    else
+        cd ~/.config/ags && ags run widgets.tsx "$@" &
+        disown
+        sleep 1
+        [ -n "$1" ] && ags toggle "$INSTANCE" "$1" 2>/dev/null
+    fi
+}
+
+case "$CMD" in
+    qs|quicksettings)     toggle "ags-quicksettings" ;;
+    mp|mediaplayer)       toggle "ags-mediaplayer" ;;
+    mon|monitor)          toggle "ags-monitor" ;;
+    mixer|audiomixer)     toggle "ags-audiomixer" ;;
+    cal|calendar)         toggle "ags-calendar" ;;
+    ss|screenshot)        toggle "ags-screenshot" ;;
+    pwr|power)            toggle "ags-power" ;;
+    kb|layout)            toggle "ags-layout" ;;
+    stop|quit)            ags quit "$INSTANCE" 2>/dev/null ;;
+    list)                 echo "Widget instances:"; ags list 2>/dev/null; echo "Windows:"; hyprctl clients 2>/dev/null | grep "ags-" || echo "(none)" ;;
+    help|*)
+        echo "Usage: ags-widget <widget>"
+        echo ""
+        echo "Widgets:"
+        echo "  qs|quicksettings   Quick Settings panel"
+        echo "  mp|mediaplayer     Media player"
+        echo "  mon|monitor        System monitor"
+        echo "  mixer|audiomixer   Audio mixer"
+        echo "  cal|calendar       Calendar"
+        echo "  ss|screenshot      Screenshot capture"
+        echo "  pwr|power          Power profiles"
+        echo "  kb|layout          Keyboard layout"
+        echo "  stop|quit          Stop all widgets"
+        echo "  list               List running instances"
+        ;;
+esac
