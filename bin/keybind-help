@@ -7,7 +7,7 @@ entries=(
     "󰘳 M           Exit Hyprland"
     "󰘳 E           Yazi (file manager)"
     "󰘳 V           Toggle floating"
-    "󰘳 R / D       Wofi menu"
+    "󰘳 R / D       Categorized launcher"
     "󰘳 L           Lock (hyprlock)"
     "󰘳 W           Wallpaper (fzf picker)"
     "󰘳 S           Pywal color swatch"

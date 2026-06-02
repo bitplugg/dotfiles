@@ -1,0 +1,111 @@
+#!/usr/bin/env bash
+# Категоризированный лаунчер с миниатюрой обоев
+
+WALLPAPER=$(cat ~/.cache/wal/wal 2>/dev/null)
+WOFI_DIR="$HOME/.config/wofi"
+mkdir -p "$WOFI_DIR"
+
+# Generate thumbnail
+THUMB="/tmp/wofi-thumb.png"
+if [ -n "$WALLPAPER" ] && [ -f "$WALLPAPER" ]; then
+    convert "$WALLPAPER" -resize 80x80^ -gravity center -extent 80x80 "$THUMB" 2>/dev/null
+fi
+
+# Build wofi CSS with wallpaper thumbnail
+WOFI_CSS="$WOFI_DIR/launcher.css"
+cat > "$WOFI_CSS" << CSS
+#window {
+    background-color: rgba(0, 0, 0, 0.85);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+#input {
+    margin: 8px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    font-size: 14px;
+}
+#inner-box {
+    margin: 0 8px 8px;
+}
+#outer-box {
+    padding-top: 96px;
+    background-image: url('$THUMB');
+    background-size: 80px;
+    background-position: top center;
+    background-repeat: no-repeat;
+}
+#scroll {
+}
+#text {
+    color: #ffffff;
+    padding: 4px;
+}
+#entry {
+    padding: 6px 10px;
+    border-radius: 6px;
+}
+#entry:selected {
+    background-color: rgba(137, 180, 250, 0.3);
+}
+#entry:selected #text {
+    font-weight: bold;
+}
+CSS
+
+CATEGORIES=(
+    "  Terminal"
+    "  Files"
+    "󱕍  Scripts"
+    "  System"
+    "󰛳  Internet"
+    "󰝚  Media"
+    "  Tools"
+    "  AI"
+    "  Power"
+)
+
+declare -A APPS
+APPS["  Terminal"]="kitty\n󰊢  lazygit\n󰻠  btop\n󰝚  ncmpcpp\n󱩒  tmux-sessionizer\n󰸈  audio-recorder\n󰔟  pomodoro-tui"
+APPS["  Files"]="󰝰  yazi\n󰉋  mount-tui\n󰅟  ncdu\n  backup-configs\n  screenshot-gallery"
+APPS["󱕍  Scripts"]="󰘸  update-all\n󰦘  pywal-update-all\n󰌾  colors-edit\n󰌠  waybar-switch\n󰈔  search\n󰄉  calculator\n󰓹  emoji-picker\n󰕲  window-killer\n󰤔  wifi-qr\n󰑭  idle-inhibit\n󱦉  git-status\n󰀻  quick-notes\n󰕧  workspace-overview"
+APPS["  System"]="  settings\n󰍹  display-manager\n󰂯  bluetooth-tui\n  network-tui\n  pacman-tui\n󰨷  systemd-tui\n󰛨  power-profile\n󰤆  dotfiles-updater\n󰶡  dotfiles-settings\n󱩒  tmux-sessionizer"
+APPS["󰛳  Internet"]="󰈹  firefox\n󰈔  search\n󰉏  bookmarks-tui\n󰇮  media-dl"
+APPS["󰝚  Media"]="  wallpaper-picker\n󰹑  screenshot-menu\n󰈉  screenshot-annotate\n󰾰  audio-switch\n󰻃  cava-toggle\n󰚌  random-wallpaper\n󰹏  night-mode"
+APPS["  Tools"]="󰣏  calculator\n󰓹  emoji-picker\n󰳰  translate\n󰹸  qr-decode\n  cht\n󰣐  clipboard\n󰹢  nerd-font-viewer\n󰈪  colorpicker"
+APPS["  AI"]="󰭎  ai\n󰭎  ai-explain"
+APPS["  Power"]="󰐥  powermenu\n󰤄  lock\n󰤂  suspend\n󰤁  hibernate\n󰜫  reboot\n󰤆  shutdown"
+
+# First menu: categories
+CHOICE=$(printf '%b\n' "${CATEGORIES[@]}" | wofi --dmenu -p "" -W 300 -H 450 --style "$WOFI_CSS" 2>/dev/null)
+[ -z "$CHOICE" ] && exit 0
+
+# Second menu: apps in category
+APPS_LIST="${APPS[$CHOICE]}"
+[ -z "$APPS_LIST" ] && exit 0
+
+SECOND=$(echo -e "$APPS_LIST" | wofi --dmenu -p "" -W 450 -H 500 --style "$WOFI_CSS" 2>/dev/null)
+[ -z "$SECOND" ] && exit 0
+
+APP=$(echo "$SECOND" | awk '{print $NF}')
+
+case "$APP" in
+    kitty)        kitty ;;
+    lazygit|btop|ncmpcpp|ncdu|yazi|tmux-sessionizer)
+        kitty -e "$APP" ;;
+    firefox)      firefox ;;
+    lock)         hyprlock ;;
+    suspend)      systemctl suspend ;;
+    hibernate)    systemctl hibernate ;;
+    reboot)       systemctl reboot ;;
+    shutdown)     systemctl poweroff ;;
+    clipboard)    cliphist list | ~/.local/bin/dmenu -p "Clipboard" | cliphist decode | wl-copy ;;
+    ai)           kitty --class=floating-term -e ~/.local/bin/ai ;;
+    ai-explain)   kitty --class=floating-term -e ~/.local/bin/ai-explain ;;
+    *)
+        if [ -f ~/.local/bin/"$APP" ]; then ~/.local/bin/"$APP"
+        else notify-send "Launcher" "Unknown: $APP"
+        fi ;;
+esac
