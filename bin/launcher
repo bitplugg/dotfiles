@@ -86,6 +86,9 @@ echo "hibernate|hibernate" >> /tmp/wofi-cats/power
 echo "reboot|reboot" >> /tmp/wofi-cats/power
 echo "shutdown|shutdown" >> /tmp/wofi-cats/power
 
+# Create "All" category — merge everything
+cat /tmp/wofi-cats/* 2>/dev/null | sort -u > /tmp/wofi-cats/all
+
 # Clean up empty categories
 for f in /tmp/wofi-cats/*; do
     [ -s "$f" ] || rm -f "$f"
@@ -93,6 +96,7 @@ done
 
 # ── First menu: categories ────────────────
 declare -A CAT_ICONS
+CAT_ICONS[all]="  All Apps"
 CAT_ICONS[terminal]="  Terminal"
 CAT_ICONS[files]="  Files"
 CAT_ICONS[scripts]="󱕍  Scripts"
