@@ -5,50 +5,47 @@ WALLPAPER=$(cat ~/.cache/wal/wal 2>/dev/null)
 WOFI_DIR="$HOME/.config/wofi"
 mkdir -p "$WOFI_DIR"
 
-# Get screen width
-SCREEN_W=$(hyprctl monitors -j 2>/dev/null | python3 -c "import sys,json; m=json.load(sys.stdin); print(m[0]['width'])" 2>/dev/null || echo 1920)
-
-# Generate wallpaper banner (full width top)
+# Generate wallpaper banner
 BANNER="/tmp/wofi-banner.png"
 if [ -n "$WALLPAPER" ] && [ -f "$WALLPAPER" ]; then
-    convert "$WALLPAPER" -resize "${SCREEN_W}x130^" -gravity center -extent "${SCREEN_W}x130" "$BANNER" 2>/dev/null
+    convert "$WALLPAPER" -resize 500x90^ -gravity center -extent 500x90 "$BANNER" 2>/dev/null
 fi
 
 # Build wofi CSS with wallpaper banner at top
 WOFI_CSS="$WOFI_DIR/launcher.css"
 cat > "$WOFI_CSS" << CSS
 #window {
-    background-color: rgba(0, 0, 0, 0.9);
-    border-radius: 0;
-    border: none;
+    background-color: rgba(0, 0, 0, 0.92);
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 #input {
-    margin: 8px 24px;
-    padding: 12px 18px;
+    margin: 8px 14px 4px;
+    padding: 10px 14px;
     border-radius: 8px;
     background-color: rgba(255, 255, 255, 0.08);
     color: #ffffff;
     font-size: 14px;
 }
 #inner-box {
-    margin: 0 24px 16px;
+    margin: 0 14px 12px;
 }
 #outer-box {
-    padding-top: 145px;
+    padding-top: 105px;
     background-image: url('$BANNER');
-    background-size: ${SCREEN_W}px 130px;
+    background-size: 500px 90px;
     background-position: top center;
     background-repeat: no-repeat;
 }
 #text {
     color: #ffffff;
-    padding: 8px 6px;
+    padding: 6px 4px;
     font-size: 13px;
 }
 #entry {
-    padding: 10px 16px;
+    padding: 8px 12px;
     border-radius: 6px;
-    margin: 1px 4px;
+    margin: 1px 0;
 }
 #entry:selected {
     background-color: rgba(137, 180, 250, 0.2);
@@ -181,14 +178,14 @@ APPS["  Power"]="󰐥  powermenu|Power menu (wofi)
 󰤆  shutdown|Power off"
 
 # First menu: categories
-CHOICE=$(printf '%b\n' "${CATEGORIES[@]}" | wofi --dmenu -p "" -W "$SCREEN_W" -H 550 --style "$WOFI_CSS" 2>/dev/null)
+CHOICE=$(printf '%b\n' "${CATEGORIES[@]}" | wofi --dmenu -p "" -W 420 -H 480 --style "$WOFI_CSS" 2>/dev/null)
 [ -z "$CHOICE" ] && exit 0
 
 # Second menu: apps in category
 APPS_LIST="${APPS[$CHOICE]}"
 [ -z "$APPS_LIST" ] && exit 0
 
-SECOND=$(echo -e "$APPS_LIST" | wofi --dmenu -p "" -W "$SCREEN_W" -H 600 --style "$WOFI_CSS" 2>/dev/null)
+SECOND=$(echo -e "$APPS_LIST" | wofi --dmenu -p "" -W 500 -H 520 --style "$WOFI_CSS" 2>/dev/null)
 [ -z "$SECOND" ] && exit 0
 
 APP=$(echo "$SECOND" | awk -F'|' '{print $1}' | awk '{print $NF}')
