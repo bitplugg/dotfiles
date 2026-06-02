@@ -44,6 +44,46 @@ fi
 mkdir -p /tmp/wofi-cats
 rm -f /tmp/wofi-cats/*
 
+# Nerd Font icon by app name/exec
+app_icon() {
+    local name="$1" execp="$2"
+    local e=$(basename "$execp" | tr '[:upper:]' '[:lower:]')
+    case "$e" in
+        firefox|brave|chromium|google-chrome|qutebrowser) echo " " ;;
+        thunderbird|mailspring|geary) echo " " ;;
+        kitty|alacritty|wezterm|foot|st|urxvt|xterm|ghostty) echo " " ;;
+        dolphin|thunar|nautilus|nemo|pcmanfm|ranger|yazi) echo " " ;;
+        gimp|inkscape|krita) echo " " ;;
+        mpv|vlc|celluloid|totem) echo " " ;;
+        spotify|rhythmbox|strawberry|audacious) echo "阮 " ;;
+        firefox-developer-edition) echo " " ;;
+        discord|vesktop|telegram-desktop) echo " " ;;
+        code|code-insiders|codium) echo " " ;;
+        nvim|vim|neovim|helix|emacs) echo " " ;;
+        libreoffice|libreoffice-writer|libreoffice-calc|libreoffice-impress) echo " " ;;
+        gparted|gnome-disks|caja) echo " " ;;
+        pavucontrol|pulsemixer|qpwgraph|helvum) echo " " ;;
+        obs-studio|obs) echo " " ;;
+        feh|sxiv|imv|eog|loupe|qview) echo " " ;;
+        evince|okular|zathura) echo " " ;;
+        htop|btop|gotop|zenith) echo " " ;;
+        lazygit|gitg|gitahead|git-cola) echo " " ;;
+        pcsx2|dolphin-emu|steam|lutris|mangohud|gamescope) echo " " ;;
+        bitwarden|keepassxc) echo " " ;;
+        slack|teams|element|signal) echo " " ;;
+        virt-manager|boxes|gnome-boxes) echo " " ;;
+        simplescreenrecorder|wf-recorder) echo " " ;;
+        obsidian|logseq|zettlr) echo " " ;;
+        ncmpcpp|cmus|mocp) echo " " ;;
+        cava|glava) echo "阮 " ;;
+        neofetch|fastfetch|screenfetch) echo " " ;;
+        calc|calculator|gnome-calculator|qalculate) echo " " ;;
+        nm-connection-editor|networkmanager|nmtui) echo " " ;;
+        blueman|bluetooth) echo " " ;;
+        *) echo "" ;;
+    esac
+}
+
 # Category mapping
 cat_to_file() {
     local cats="$1" name="$2" execp="$3"
@@ -61,7 +101,15 @@ cat_to_file() {
             FileManager|Filesystem) f="files"; break ;;
         esac
     done
-    echo "$name|$execp" >> /tmp/wofi-cats/$f
+    local icon=$(app_icon "$name" "$execp")
+    [ -z "$icon" ] && case "$f" in
+        terminal) icon=" " ;; files) icon=" " ;; scripts) icon="󰱉 " ;;
+        system) icon=" " ;; internet) icon=" " ;; media) icon=" " ;;
+        dev) icon=" " ;; tools) icon=" " ;; games) icon=" " ;;
+        office) icon=" " ;; ai) icon=" " ;; power) icon=" " ;;
+        *) icon=" " ;;
+    esac
+    echo "$icon $name|$execp" >> /tmp/wofi-cats/$f
 }
 
 while IFS='|' read -r NAME EXEC CATS; do
@@ -71,20 +119,65 @@ done < "$CACHE"
 # Also add custom scripts
 for s in ~/.local/bin/*; do
     [ -f "$s" ] && [ -x "$s" ] || continue
-    echo "$(basename $s)|$(basename $s)" >> /tmp/wofi-cats/scripts
+    b=$(basename "$s")
+    case "$b" in
+        ai*)      ic=" " ;;
+        *update*|*updater*) ic=" " ;;
+        *wallpaper*|*pic*) ic=" " ;;
+        *screenshot*) ic=" " ;;
+        *bluetooth*|*bt*) ic=" " ;;
+        *network*|*wifi*) ic=" " ;;
+        *display*|*monitor*) ic=" " ;;
+        *power*|*profile*) ic=" " ;;
+        *pacman*|*paru*) ic=" " ;;
+        *systemd*|*service*) ic=" " ;;
+        *mount*) ic=" " ;;
+        *pomodoro*) ic=" " ;;
+        *bookmark*) ic=" " ;;
+        *music*|*ncmpcpp*|*mpd*) ic=" " ;;
+        *audio*|*volume*|*mic*) ic=" " ;;
+        *color*|*palette*) ic=" " ;;
+        *search*) ic=" " ;;
+        *qr*) ic=" " ;;
+        *emoji*) ic=" " ;;
+        *translate*) ic=" " ;;
+        *notes*) ic=" " ;;
+        *clipboard*) ic=" " ;;
+        *calculator*|*calc*) ic=" " ;;
+        *git*|*lazygit*) ic=" " ;;
+        *dotfiles*) ic=" " ;;
+        *waybar*) ic=" " ;;
+        *terminal*|*cmatrix*|*pipes*|*saver*|*nyancat*|*asciiquarium*) ic=" " ;;
+        *tmux*) ic="󱩒 " ;;
+        *btop*|*htop*) ic=" " ;;
+        *timer*|*break*|*notify*) ic=" " ;;
+        *fastfetch*) ic=" " ;;
+        *hyprctl*|*summary*|*hyprland*) ic=" " ;;
+        *window*) ic=" " ;;
+        *cava*) ic="阮 " ;;
+        *camera*) ic=" " ;;
+        *night*) ic=" " ;;
+        *search*) ic=" " ;;
+        *backup*) ic=" " ;;
+        *settings*) ic=" " ;;
+        *workspace*) ic=" " ;;
+        *appmenu*|*dmenu*|*launcher*) ic="󱉊 " ;;
+        *)        ic="󰱉 " ;;
+    esac
+    echo "$ic $b|$b" >> /tmp/wofi-cats/scripts
 done
 
 # Add AI
-echo "ai|ai" >> /tmp/wofi-cats/ai
-echo "ai-explain|ai-explain" >> /tmp/wofi-cats/ai
+echo "  ai|ai" >> /tmp/wofi-cats/ai
+echo "  ai-explain|ai-explain" >> /tmp/wofi-cats/ai
 
 # Add Power
-echo "powermenu|powermenu" >> /tmp/wofi-cats/power
-echo "lock|lock" >> /tmp/wofi-cats/power
-echo "suspend|suspend" >> /tmp/wofi-cats/power
-echo "hibernate|hibernate" >> /tmp/wofi-cats/power
-echo "reboot|reboot" >> /tmp/wofi-cats/power
-echo "shutdown|shutdown" >> /tmp/wofi-cats/power
+echo "  powermenu|powermenu" >> /tmp/wofi-cats/power
+echo "  lock|lock" >> /tmp/wofi-cats/power
+echo "  suspend|suspend" >> /tmp/wofi-cats/power
+echo "  hibernate|hibernate" >> /tmp/wofi-cats/power
+echo "  reboot|reboot" >> /tmp/wofi-cats/power
+echo "  shutdown|shutdown" >> /tmp/wofi-cats/power
 
 # Create "All" category — merge everything
 cat /tmp/wofi-cats/* 2>/dev/null | sort -u > /tmp/wofi-cats/all
