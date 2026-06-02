@@ -3,6 +3,16 @@
 ## [Unreleased]
 
 ### Added
+- `launcher` — категоризированный лаунчер (Super+R/D):
+  10 категорий (Terminal, Files, Scripts, System, Internet, Media, Dev, Tools, AI, Power)
+  с миниатюрой обоев вверху wofi и расширенным списком приложений
+
+### Changed
+- Заменён `$menu` (wofi drun) на новый `launcher` в keybinds.conf
+
+## [2025-06-02] — Waybar themes + scripts batch
+
+### Added
 - 30 waybar themes + `waybar-switch` (`Super+Ctrl+,`)
 - `audio-switch` — переключение аудиовыхода (`Super+Ctrl+A`)
 - `pomodoro-tui` — Pomodoro таймер (`Super+T`)
