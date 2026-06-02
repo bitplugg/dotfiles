@@ -1,218 +1,157 @@
 #!/usr/bin/env bash
-# Категоризированный лаунчер с миниатюрой обоев
+# Категоризированный лаунчер: системные приложения + скрипты
 
 WALLPAPER=$(cat ~/.cache/wal/wal 2>/dev/null)
 WOFI_DIR="$HOME/.config/wofi"
 mkdir -p "$WOFI_DIR"
-
-# Generate wallpaper banner
 BANNER="/tmp/wofi-banner.png"
-if [ -n "$WALLPAPER" ] && [ -f "$WALLPAPER" ]; then
-    convert "$WALLPAPER" -resize 500x90^ -gravity center -extent 500x90 "$BANNER" 2>/dev/null
-fi
+[ -n "$WALLPAPER" ] && [ -f "$WALLPAPER" ] && convert "$WALLPAPER" -resize 500x90^ -gravity center -extent 500x90 "$BANNER" 2>/dev/null
 
-# Build wofi CSS with wallpaper banner at top
 WOFI_CSS="$WOFI_DIR/launcher.css"
+BGURL=""
+[ -f "$BANNER" ] && BGURL="background-image: url('$BANNER');"
 cat > "$WOFI_CSS" << CSS
-#window {
-    background-color: rgba(0, 0, 0, 0.92);
-    border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-}
-#input {
-    margin: 8px 14px 4px;
-    padding: 10px 14px;
-    border-radius: 8px;
-    background-color: rgba(255, 255, 255, 0.08);
-    color: #ffffff;
-    font-size: 14px;
-}
-#inner-box {
-    margin: 0 14px 12px;
-}
-#outer-box {
-    padding-top: 105px;
-    background-image: url('$BANNER');
-    background-size: 500px 90px;
-    background-position: top center;
-    background-repeat: no-repeat;
-}
-#text {
-    color: #ffffff;
-    padding: 6px 4px;
-    font-size: 13px;
-}
-#entry {
-    padding: 8px 12px;
-    border-radius: 6px;
-    margin: 1px 0;
-}
-#entry:selected {
-    background-color: rgba(137, 180, 250, 0.2);
-}
-#entry:selected #text {
-    font-weight: bold;
-}
+#window { background-color: rgba(0,0,0,0.92); border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); }
+#input { margin: 8px 14px 4px; padding: 10px 14px; border-radius: 8px; background-color: rgba(255,255,255,0.08); color: #fff; font-size: 14px; }
+#inner-box { margin: 0 14px 12px; }
+#outer-box { padding-top: 105px; $BGURL background-size: 500px 90px; background-position: top center; background-repeat: no-repeat; }
+#text { color: #fff; padding: 6px 4px; font-size: 13px; }
+#entry { padding: 8px 12px; border-radius: 6px; margin: 1px 0; }
+#entry:selected { background-color: rgba(137,180,250,0.2); }
+#entry:selected #text { font-weight: bold; }
 CSS
 
-CATEGORIES=(
-    "  Terminal"
-    "  Files"
-    "󱕍  Scripts"
-    "  System"
-    "󰛳  Internet"
-    "󰝚  Media"
-    "󰄛  Dev"
-    "  Tools"
-    "  AI"
-    "  Power"
-)
+# ── Collect .desktop apps ─────────────────
+CACHE="/tmp/wofi-apps.cache"
+if [ ! -f "$CACHE" ] || [ "$(find /usr/share/applications ~/.local/share/applications -name '*.desktop' -newer "$CACHE" 2>/dev/null | head -1)" ]; then
+    > "$CACHE"
+    for dir in /usr/share/applications ~/.local/share/applications; do
+        [ -d "$dir" ] || continue
+        for f in "$dir"/*.desktop; do
+            [ -f "$f" ] || continue
+            grep -q "^NoDisplay=true" "$f" 2>/dev/null && continue
+            NAME=$(grep -m1 "^Name=" "$f" 2>/dev/null | cut -d= -f2-)
+            EXEC=$(grep -m1 "^Exec=" "$f" 2>/dev/null | cut -d= -f2- | sed 's/%.//g' | awk '{print $1}')
+            CATS=$(grep -m1 "^Categories=" "$f" 2>/dev/null | cut -d= -f2-)
+            TERM=$(grep -m1 "^Terminal=" "$f" 2>/dev/null | cut -d= -f2-)
+            [ -z "$NAME" ] || [ -z "$EXEC" ] && continue
+            echo "$NAME|$EXEC|$CATS" >> "$CACHE"
+        done
+    done
+fi
 
-declare -A APPS
-APPS["  Terminal"]="kitty|Kitty terminal
-󰊢  lazygit|Git TUI
-󰻠  btop|System monitor
-󰝚  ncmpcpp|Music player
-󱩒  tmux-sessionizer|Project switcher
-󱩒  tmux|Terminal multiplexer
-󰸈  audio-recorder|Record audio
-󰔟  pomodoro-tui|Pomodoro timer
-  cht|cheat.sh
-󰅟  ncdu|Disk usage
-󰦘  htop|Process manager
-󰣏  fastfetch|System info"
+# ── Categorize into files ─────────────────
+mkdir -p /tmp/wofi-cats
+rm -f /tmp/wofi-cats/*
 
-APPS["  Files"]="󰝰  yazi|Terminal file manager
-󰉋  mount-tui|Mount/unmount drives
-󰅟  ncdu|Disk usage analyzer
-󰈞  dolphin|GUI file manager
-󰈱  thunar|GUI file manager
-󰈀  bash|Open shell here
-  backup-configs|Backup configs
-  screenshot-gallery|Browse screenshots
-󰉎  font-preview|Nerd Font icons"
+# Category mapping
+cat_to_file() {
+    local cats="$1" name="$2" execp="$3"
+    local f="tools"
+    for c in $(echo "$cats" | tr ';' '\n'); do
+        case "$c" in
+            Network|WebBrowser) f="internet"; break ;;
+            Development|TextEditor) f="dev"; break ;;
+            System|Settings|Hardware) f="system"; break ;;
+            Utility|Accessibility) f="tools"; break ;;
+            Graphics|AudioVideo|Player|Video) f="media"; break ;;
+            Game) f="games"; break ;;
+            Office|Database|Finance) f="office"; break ;;
+            TerminalEmulator) f="terminal"; break ;;
+            FileManager|Filesystem) f="files"; break ;;
+        esac
+    done
+    echo "$name|$execp" >> /tmp/wofi-cats/$f
+}
 
-APPS["󱕍  Scripts"]="󰘸  update-all|Full system update
-󰦘  pywal-update-all|Regenerate pywal colors
-󰌾  colors-edit|Edit pywal colors
-󰌠  waybar-switch|Switch waybar theme
-󰈔  search|Web search engine chooser
-󰄉  calculator|Calculate expression
-󰓹  emoji-picker|Copy emoji
-󰕲  window-killer|Force close window
-󰤔  wifi-qr|Generate WiFi QR code
-󰑭  idle-inhibit|Toggle idle inhibition
-󱦉  git-status|Show git diff
-󰀻  quick-notes|Open quick notes
-󰕧  workspace-overview|Show all workspaces
-󱩒  terminal-saver|Random screensaver
-󰈆  notify-me|Set a reminder
-󰅐  break-timer|Break reminder
-󰅐  hyprctl-summary|Hyprland info"
+while IFS='|' read -r NAME EXEC CATS; do
+    cat_to_file "$CATS" "$NAME" "$EXEC"
+done < "$CACHE"
 
-APPS["  System"]="  settings|Settings app (GUI)
-󰍹  display-manager|Monitor layout
-󰂯  bluetooth-tui|Bluetooth manager
-  network-tui|WiFi manager
-  pacman-tui|Package manager
-󰨷  systemd-tui|Systemd services
-󰛨  power-profile|CPU governor
-󰤆  dotfiles-updater|Git TUI for dotfiles
-󰶡  dotfiles-settings|Dotfiles config TUI
-󰈀  dotfiles-branch|Switch git branch
-󰻃  cava-toggle|Audio visualizer
-󰤃  waybar-restart|Restart waybar
-󰤄  hyprlock|Lock screen"
+# Also add custom scripts
+for s in ~/.local/bin/*; do
+    [ -f "$s" ] && [ -x "$s" ] || continue
+    echo "$(basename $s)|$(basename $s)" >> /tmp/wofi-cats/scripts
+done
 
-APPS["󰛳  Internet"]="󰈹  firefox|Web browser
-󰈹  brave|Brave browser
-󰈔  search|Web search
-󰉏  bookmarks-tui|Firefox bookmarks
-󰇮  media-dl|Download video/audio
-󰀂  searxng-git|Private meta-search
-󰤔  wifi-qr|WiFi QR code"
+# Add AI
+echo "ai|ai" >> /tmp/wofi-cats/ai
+echo "ai-explain|ai-explain" >> /tmp/wofi-cats/ai
 
-APPS["󰝚  Media"]="  wallpaper-picker|Browse & set wallpaper
-󰹑  screenshot-menu|Screenshot options
-󰈉  screenshot-annotate|Screenshot + draw
-󰚌  random-wallpaper|Random wallpaper
-󰾰  audio-switch|Switch audio output
-󰻃  cava-toggle|Audio visualizer
-󰹏  night-mode|Toggle night mode
-󰃠  mpv|Video player
-󰈀  screenrecord|Record screen (region)
-󰤅  audio-recorder|Record microphone
-󱩒  terminal-saver|Fun screensaver"
+# Add Power
+echo "powermenu|powermenu" >> /tmp/wofi-cats/power
+echo "lock|lock" >> /tmp/wofi-cats/power
+echo "suspend|suspend" >> /tmp/wofi-cats/power
+echo "hibernate|hibernate" >> /tmp/wofi-cats/power
+echo "reboot|reboot" >> /tmp/wofi-cats/power
+echo "shutdown|shutdown" >> /tmp/wofi-cats/power
 
-APPS["󰄛  Dev"]="󰊢  lazygit|Git TUI
-󰈭  nvim|Neovim editor
-󰣏  json|JSON formatter (jq)
-󰣏  cht|cheat.sh snippets
-󰣏  qr-decode|Decode QR code
-󰣏  hyprctl-summary|Hyprland debug
-󰈀  translate|Translate text
-󰣐  clipboard|Clipboard history"
+# Clean up empty categories
+for f in /tmp/wofi-cats/*; do
+    [ -s "$f" ] || rm -f "$f"
+done
 
-APPS["  Tools"]="󰣏  calculator|Calculate expression
-󰓹  emoji-picker|Copy emoji
-󰳰  translate|Translate text
-󰹸  qr-decode|Decode QR from screen
-  cht|cheat.sh reference
-󰣐  clipboard|Clipboard history
-󰹢  nerd-font-viewer|Browse Nerd Fonts
-󰈪  colorpicker|Pick screen color
-󰤅  break-timer|Break reminder
-󰑭  idle-inhibit|Inhibit idle
-󰤔  wifi-qr|WiFi QR code"
+# ── First menu: categories ────────────────
+declare -A CAT_ICONS
+CAT_ICONS[terminal]="  Terminal"
+CAT_ICONS[files]="  Files"
+CAT_ICONS[scripts]="󱕍  Scripts"
+CAT_ICONS[system]="  System"
+CAT_ICONS[internet]="󰛳  Internet"
+CAT_ICONS[media]="󰝚  Media"
+CAT_ICONS[dev]="󰄛  Dev"
+CAT_ICONS[tools]="  Tools"
+CAT_ICONS[games]="󰋚  Games"
+CAT_ICONS[office]="󰈙  Office"
+CAT_ICONS[ai]="  AI"
+CAT_ICONS[power]="  Power"
 
-APPS["  AI"]="󰭎  ai|Ask Mistral AI
-󰭎  ai-explain|Explain selected text
-󰭎  code-review|AI code review
-󰭎  ai-file|Analyze file with AI"
+MENU_CATS=()
+CAT_NAMES=()
+for f in /tmp/wofi-cats/*; do
+    key=$(basename "$f")
+    icon="${CAT_ICONS[$key]}"
+    [ -z "$icon" ] && icon="  $key"
+    MENU_CATS+=("$icon")
+    CAT_NAMES+=("$key")
+done
 
-APPS["  Power"]="󰐥  powermenu|Power menu (wofi)
-󰤄  lock|Lock screen
-󰤂  suspend|Sleep
-󰤁  hibernate|Hibernate
-󰜫  reboot|Restart
-󰤆  shutdown|Power off"
-
-# First menu: categories
-CHOICE=$(printf '%b\n' "${CATEGORIES[@]}" | wofi --dmenu -p "" -W 420 -H 480 --style "$WOFI_CSS" 2>/dev/null)
+CHOICE=$(printf '%s\n' "${MENU_CATS[@]}" | wofi --dmenu -p "" -W 420 -H 480 --style "$WOFI_CSS" 2>/dev/null)
 [ -z "$CHOICE" ] && exit 0
 
-# Second menu: apps in category
-APPS_LIST="${APPS[$CHOICE]}"
-[ -z "$APPS_LIST" ] && exit 0
+# Find selected category file
+CAT_KEY=""
+for i in "${!MENU_CATS[@]}"; do
+    if [ "${MENU_CATS[$i]}" = "$CHOICE" ]; then
+        CAT_KEY="${CAT_NAMES[$i]}"
+        break
+    fi
+done
+[ -z "$CAT_KEY" ] && notify-send "Launcher" "Category not found" && exit 0
 
-SECOND=$(echo -e "$APPS_LIST" | wofi --dmenu -p "" -W 500 -H 520 --style "$WOFI_CSS" 2>/dev/null)
+# ── Second menu: apps in category ─────────
+APPS_LIST=$(cat /tmp/wofi-cats/"$CAT_KEY" 2>/dev/null)
+[ -z "$APPS_LIST" ] && notify-send "Launcher" "Empty category" && exit 0
+
+SECOND=$(echo "$APPS_LIST" | wofi --dmenu -p "" -W 500 -H 520 --style "$WOFI_CSS" 2>/dev/null)
 [ -z "$SECOND" ] && exit 0
 
-APP=$(echo "$SECOND" | awk -F'|' '{print $1}' | awk '{print $NF}')
-DESC=$(echo "$SECOND" | awk -F'|' '{print $2}')
+APP=$(echo "$SECOND" | awk -F'|' '{print $2}' | xargs)
 
+# ── Launch ─────────────────────────────────
 case "$APP" in
-    kitty|htop)        kitty -e "$APP" ;;
-    lazygit|btop|ncmpcpp|ncdu|yazi|tmux-sessionizer)
+    kitty|htop|lazygit|btop|ncmpcpp|ncdu|yazi|tmux-sessionizer|tmux|nvim)
         kitty -e "$APP" ;;
-    tmux)         kitty -e tmux ;;
-    dolphin|thunar)    "$APP" ;;
+    dolphin|thunar) "$APP" ;;
     firefox|brave|mpv) "$APP" ;;
-    bash)         kitty ;;
-    nvim)         kitty -e nvim ;;
-    json)         kitty -e bash -c 'echo "Enter JSON:"; read -r json; echo "$json" | jq .' ;;
-    screenrecord) wf-recorder -f "$HOME/Videos/recording_$(date +%Y%m%d_%H%M%S).mp4" --geometry "$(slurp)" ;;
-    lock)         hyprlock ;;
-    suspend)      systemctl suspend ;;
-    hibernate)    systemctl hibernate ;;
-    reboot)       systemctl reboot ;;
-    shutdown)     systemctl poweroff ;;
-    clipboard)    cliphist list | ~/.local/bin/dmenu -p "Clipboard" | cliphist decode | wl-copy ;;
-    code-review)  ~/.local/bin/ai-explain ;;
-    ai-file)      ~/.local/bin/ai ;;
-    ai)           kitty --class=floating-term -e ~/.local/bin/ai ;;
-    ai-explain)   kitty --class=floating-term -e ~/.local/bin/ai-explain ;;
-    search)       ~/.local/bin/search ;;
+    lock) hyprlock ;;
+    suspend) systemctl suspend ;;
+    hibernate) systemctl hibernate ;;
+    reboot) systemctl reboot ;;
+    shutdown) systemctl poweroff ;;
+    ai) kitty --class=floating-term -e ~/.local/bin/ai ;;
+    ai-explain) kitty --class=floating-term -e ~/.local/bin/ai-explain ;;
+    powermenu) ~/.local/bin/powermenu ;;
     *)
         if [ -f ~/.local/bin/"$APP" ]; then ~/.local/bin/"$APP"
         elif command -v "$APP" &>/dev/null; then "$APP"
