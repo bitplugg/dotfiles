@@ -8,7 +8,7 @@ mkdir -p "$WOFI_DIR"
 # Generate thumbnail
 THUMB="/tmp/wofi-thumb.png"
 if [ -n "$WALLPAPER" ] && [ -f "$WALLPAPER" ]; then
-    convert "$WALLPAPER" -resize 80x80^ -gravity center -extent 80x80 "$THUMB" 2>/dev/null
+    convert "$WALLPAPER" -resize 90x90^ -gravity center -extent 90x90 "$THUMB" 2>/dev/null
 fi
 
 # Build wofi CSS with wallpaper thumbnail
@@ -16,39 +16,37 @@ WOFI_CSS="$WOFI_DIR/launcher.css"
 cat > "$WOFI_CSS" << CSS
 #window {
     background-color: rgba(0, 0, 0, 0.85);
-    border-radius: 12px;
+    border-radius: 14px;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 #input {
-    margin: 8px;
-    padding: 8px 12px;
+    margin: 10px 12px 4px;
+    padding: 10px 14px;
     border-radius: 8px;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.08);
     color: #ffffff;
     font-size: 14px;
 }
 #inner-box {
-    margin: 0 8px 8px;
+    margin: 0 12px 10px;
 }
 #outer-box {
-    padding-top: 96px;
+    padding-top: 108px;
     background-image: url('$THUMB');
-    background-size: 80px;
+    background-size: 90px;
     background-position: top center;
     background-repeat: no-repeat;
 }
-#scroll {
-}
 #text {
     color: #ffffff;
-    padding: 4px;
+    padding: 6px 4px;
 }
 #entry {
-    padding: 6px 10px;
+    padding: 8px 12px;
     border-radius: 6px;
 }
 #entry:selected {
-    background-color: rgba(137, 180, 250, 0.3);
+    background-color: rgba(137, 180, 250, 0.25);
 }
 #entry:selected #text {
     font-weight: bold;
@@ -62,50 +60,159 @@ CATEGORIES=(
     "  System"
     "󰛳  Internet"
     "󰝚  Media"
+    "󰄛  Dev"
     "  Tools"
     "  AI"
     "  Power"
 )
 
 declare -A APPS
-APPS["  Terminal"]="kitty\n󰊢  lazygit\n󰻠  btop\n󰝚  ncmpcpp\n󱩒  tmux-sessionizer\n󰸈  audio-recorder\n󰔟  pomodoro-tui"
-APPS["  Files"]="󰝰  yazi\n󰉋  mount-tui\n󰅟  ncdu\n  backup-configs\n  screenshot-gallery"
-APPS["󱕍  Scripts"]="󰘸  update-all\n󰦘  pywal-update-all\n󰌾  colors-edit\n󰌠  waybar-switch\n󰈔  search\n󰄉  calculator\n󰓹  emoji-picker\n󰕲  window-killer\n󰤔  wifi-qr\n󰑭  idle-inhibit\n󱦉  git-status\n󰀻  quick-notes\n󰕧  workspace-overview"
-APPS["  System"]="  settings\n󰍹  display-manager\n󰂯  bluetooth-tui\n  network-tui\n  pacman-tui\n󰨷  systemd-tui\n󰛨  power-profile\n󰤆  dotfiles-updater\n󰶡  dotfiles-settings\n󱩒  tmux-sessionizer"
-APPS["󰛳  Internet"]="󰈹  firefox\n󰈔  search\n󰉏  bookmarks-tui\n󰇮  media-dl"
-APPS["󰝚  Media"]="  wallpaper-picker\n󰹑  screenshot-menu\n󰈉  screenshot-annotate\n󰾰  audio-switch\n󰻃  cava-toggle\n󰚌  random-wallpaper\n󰹏  night-mode"
-APPS["  Tools"]="󰣏  calculator\n󰓹  emoji-picker\n󰳰  translate\n󰹸  qr-decode\n  cht\n󰣐  clipboard\n󰹢  nerd-font-viewer\n󰈪  colorpicker"
-APPS["  AI"]="󰭎  ai\n󰭎  ai-explain"
-APPS["  Power"]="󰐥  powermenu\n󰤄  lock\n󰤂  suspend\n󰤁  hibernate\n󰜫  reboot\n󰤆  shutdown"
+APPS["  Terminal"]="kitty|Kitty terminal
+󰊢  lazygit|Git TUI
+󰻠  btop|System monitor
+󰝚  ncmpcpp|Music player
+󱩒  tmux-sessionizer|Project switcher
+󱩒  tmux|Terminal multiplexer
+󰸈  audio-recorder|Record audio
+󰔟  pomodoro-tui|Pomodoro timer
+  cht|cheat.sh
+󰅟  ncdu|Disk usage
+󰦘  htop|Process manager
+󰣏  fastfetch|System info"
+
+APPS["  Files"]="󰝰  yazi|Terminal file manager
+󰉋  mount-tui|Mount/unmount drives
+󰅟  ncdu|Disk usage analyzer
+󰈞  dolphin|GUI file manager
+󰈱  thunar|GUI file manager
+󰈀  bash|Open shell here
+  backup-configs|Backup configs
+  screenshot-gallery|Browse screenshots
+󰉎  font-preview|Nerd Font icons"
+
+APPS["󱕍  Scripts"]="󰘸  update-all|Full system update
+󰦘  pywal-update-all|Regenerate pywal colors
+󰌾  colors-edit|Edit pywal colors
+󰌠  waybar-switch|Switch waybar theme
+󰈔  search|Web search engine chooser
+󰄉  calculator|Calculate expression
+󰓹  emoji-picker|Copy emoji
+󰕲  window-killer|Force close window
+󰤔  wifi-qr|Generate WiFi QR code
+󰑭  idle-inhibit|Toggle idle inhibition
+󱦉  git-status|Show git diff
+󰀻  quick-notes|Open quick notes
+󰕧  workspace-overview|Show all workspaces
+󱩒  terminal-saver|Random screensaver
+󰈆  notify-me|Set a reminder
+󰅐  break-timer|Break reminder
+󰅐  hyprctl-summary|Hyprland info"
+
+APPS["  System"]="  settings|Settings app (GUI)
+󰍹  display-manager|Monitor layout
+󰂯  bluetooth-tui|Bluetooth manager
+  network-tui|WiFi manager
+  pacman-tui|Package manager
+󰨷  systemd-tui|Systemd services
+󰛨  power-profile|CPU governor
+󰤆  dotfiles-updater|Git TUI for dotfiles
+󰶡  dotfiles-settings|Dotfiles config TUI
+󰈀  dotfiles-branch|Switch git branch
+󰻃  cava-toggle|Audio visualizer
+󰤃  waybar-restart|Restart waybar
+󰤄  hyprlock|Lock screen"
+
+APPS["󰛳  Internet"]="󰈹  firefox|Web browser
+󰈹  brave|Brave browser
+󰈔  search|Web search
+󰉏  bookmarks-tui|Firefox bookmarks
+󰇮  media-dl|Download video/audio
+󰀂  searxng-git|Private meta-search
+󰤔  wifi-qr|WiFi QR code"
+
+APPS["󰝚  Media"]="  wallpaper-picker|Browse & set wallpaper
+󰹑  screenshot-menu|Screenshot options
+󰈉  screenshot-annotate|Screenshot + draw
+󰚌  random-wallpaper|Random wallpaper
+󰾰  audio-switch|Switch audio output
+󰻃  cava-toggle|Audio visualizer
+󰹏  night-mode|Toggle night mode
+󰃠  mpv|Video player
+󰈀  screenrecord|Record screen (region)
+󰤅  audio-recorder|Record microphone
+󱩒  terminal-saver|Fun screensaver"
+
+APPS["󰄛  Dev"]="󰊢  lazygit|Git TUI
+󰈭  nvim|Neovim editor
+󰣏  json|JSON formatter (jq)
+󰣏  cht|cheat.sh snippets
+󰣏  qr-decode|Decode QR code
+󰣏  hyprctl-summary|Hyprland debug
+󰈀  translate|Translate text
+󰣐  clipboard|Clipboard history"
+
+APPS["  Tools"]="󰣏  calculator|Calculate expression
+󰓹  emoji-picker|Copy emoji
+󰳰  translate|Translate text
+󰹸  qr-decode|Decode QR from screen
+  cht|cheat.sh reference
+󰣐  clipboard|Clipboard history
+󰹢  nerd-font-viewer|Browse Nerd Fonts
+󰈪  colorpicker|Pick screen color
+󰤅  break-timer|Break reminder
+󰑭  idle-inhibit|Inhibit idle
+󰤔  wifi-qr|WiFi QR code"
+
+APPS["  AI"]="󰭎  ai|Ask Mistral AI
+󰭎  ai-explain|Explain selected text
+󰭎  code-review|AI code review
+󰭎  ai-file|Analyze file with AI"
+
+APPS["  Power"]="󰐥  powermenu|Power menu (wofi)
+󰤄  lock|Lock screen
+󰤂  suspend|Sleep
+󰤁  hibernate|Hibernate
+󰜫  reboot|Restart
+󰤆  shutdown|Power off"
 
 # First menu: categories
-CHOICE=$(printf '%b\n' "${CATEGORIES[@]}" | wofi --dmenu -p "" -W 300 -H 450 --style "$WOFI_CSS" 2>/dev/null)
+CHOICE=$(printf '%b\n' "${CATEGORIES[@]}" | wofi --dmenu -p "" -W 320 -H 500 --style "$WOFI_CSS" 2>/dev/null)
 [ -z "$CHOICE" ] && exit 0
 
 # Second menu: apps in category
 APPS_LIST="${APPS[$CHOICE]}"
 [ -z "$APPS_LIST" ] && exit 0
 
-SECOND=$(echo -e "$APPS_LIST" | wofi --dmenu -p "" -W 450 -H 500 --style "$WOFI_CSS" 2>/dev/null)
+SECOND=$(echo -e "$APPS_LIST" | wofi --dmenu -p "" -W 500 -H 550 --style "$WOFI_CSS" 2>/dev/null)
 [ -z "$SECOND" ] && exit 0
 
-APP=$(echo "$SECOND" | awk '{print $NF}')
+APP=$(echo "$SECOND" | awk -F'|' '{print $1}' | awk '{print $NF}')
+DESC=$(echo "$SECOND" | awk -F'|' '{print $2}')
 
 case "$APP" in
-    kitty)        kitty ;;
+    kitty|htop)        kitty -e "$APP" ;;
     lazygit|btop|ncmpcpp|ncdu|yazi|tmux-sessionizer)
         kitty -e "$APP" ;;
-    firefox)      firefox ;;
+    tmux)         kitty -e tmux ;;
+    dolphin|thunar)    "$APP" ;;
+    firefox|brave|mpv) "$APP" ;;
+    bash)         kitty ;;
+    nvim)         kitty -e nvim ;;
+    json)         kitty -e bash -c 'echo "Enter JSON:"; read -r json; echo "$json" | jq .' ;;
+    screenrecord) wf-recorder -f "$HOME/Videos/recording_$(date +%Y%m%d_%H%M%S).mp4" --geometry "$(slurp)" ;;
     lock)         hyprlock ;;
     suspend)      systemctl suspend ;;
     hibernate)    systemctl hibernate ;;
     reboot)       systemctl reboot ;;
     shutdown)     systemctl poweroff ;;
     clipboard)    cliphist list | ~/.local/bin/dmenu -p "Clipboard" | cliphist decode | wl-copy ;;
+    code-review)  ~/.local/bin/ai-explain ;;
+    ai-file)      ~/.local/bin/ai ;;
     ai)           kitty --class=floating-term -e ~/.local/bin/ai ;;
     ai-explain)   kitty --class=floating-term -e ~/.local/bin/ai-explain ;;
+    search)       ~/.local/bin/search ;;
     *)
         if [ -f ~/.local/bin/"$APP" ]; then ~/.local/bin/"$APP"
-        else notify-send "Launcher" "Unknown: $APP"
-        fi ;;
+        elif command -v "$APP" &>/dev/null; then "$APP"
+        else notify-send "Launcher" "Unknown: $APP"; fi ;;
 esac
