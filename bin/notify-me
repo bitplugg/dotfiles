@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Terminal timer/reminder
+# Usage: notify-me "message" seconds
+#        notify-me "Pasta ready!" 300
+
+MSG="${1:-Timer done}"
+SECS="${2:-60}"
+
+# Parse human time: 5m, 1h, 30s
+case "$SECS" in
+    *h) SECS=$(( ${SECS%h} * 3600 )) ;;
+    *m) SECS=$(( ${SECS%m} * 60 )) ;;
+    *s) SECS=${SECS%s} ;;
+esac
+
+echo "󰔟 Reminder in ${SECS}s: $MSG"
+notify-send -t 3000 "Reminder set" "$MSG in ${SECS}s"
+
+sleep "$SECS"
+notify-send -u critical "⏰ Reminder" "$MSG"
+echo "⏰ $MSG"

@@ -1,0 +1,2 @@
+#pulseaudio, #network, #clock, #workspaces, #cpu, #memory, #battery, #tray, #custom-launcher, #window, #custom-media, #custom-quicksettings, #custom-screenshot, #custom-keyboard, #custom-updates, #custom-weather, #custom-mic, #custom-nightmode, #custom-idleinhibitor, #custom-colorpicker, #custom-cava, #custom-power { border: 1px solid #00ff00; border-radius: 0; font-family: "Courier New", monospace; }
+#workspaces button.active { color: #00ff00; text-decoration: underline; }

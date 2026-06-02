@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Preview Nerd Font icons via wofi
+
+ICONS=$(grep -oP '^[0-9a-fA-F]+ .+' /usr/share/fish/vendor_completions.d/nerd-fonts.fish 2>/dev/null | head -100 || \
+    echo "No nerd-fonts completions found")
+[ -z "$ICONS" ] && ICONS=$(find /usr/share/fonts -name "*.ttf" -exec sh -c 'fc-query --format="%{charset}\n" "$1" | grep -oP "[0-9a-fA-F]+"' _ {} \; 2>/dev/null | head -50)
+
+# Fallback: show some common Nerd Font icons
+if [ -z "$ICONS" ]; then
+    ICONS=$(printf "  Terminal\n  Folder\n  Music\n  WiFi\n  Bluetooth\n  Volume\n  Mic\n  Moon\n  Color\n  Camera\n  Power\n  Reboot\n  Palette\n  Display")
+fi
+
+CHOICE=$(echo "$ICONS" | wofi --dmenu -p "Icons" 2>/dev/null)
+[ -z "$CHOICE" ] && exit 0
+echo "$CHOICE" | wl-copy
+notify-send "Icon" "Copied: $CHOICE"

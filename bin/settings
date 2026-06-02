@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-import json
-import os
-import subprocess
+import json, os, subprocess
 import tkinter as tk
 from tkinter import ttk, colorchooser
 
@@ -20,34 +18,52 @@ class SettingsApp:
     def __init__(self):
         self.root = tk.Tk(className="Settings")
         self.root.title("Settings")
-        self.root.geometry("700x500")
+        self.root.geometry("780x540")
         self.root.resizable(False, False)
         self.root.after(200, self._float_window)
 
         self.bg = "#" + wal_color("color0")
         self.fg = "#" + wal_color("color7")
         self.accent = "#" + wal_color("color4")
+        self.surface = "#" + wal_color("color0")
         self.root.configure(bg=self.bg)
 
         style = ttk.Style()
         style.theme_use("clam")
-        style.configure("TNotebook", background=self.bg, borderwidth=0)
-        style.configure("TNotebook.Tab", background=self.bg, foreground=self.fg, padding=[12, 4])
-        style.map("TNotebook.Tab", background=[("selected", self.accent)], foreground=[("selected", "#000000")])
+        style.configure("TNotebook", background=self.bg, borderwidth=0, padding=0)
+        style.configure("TNotebook.Tab", background=self.surface, foreground=self.fg,
+                        padding=[16, 6], font=("JetBrainsMono Nerd Font", 11))
+        style.map("TNotebook.Tab", background=[("selected", self.accent)],
+                  foreground=[("selected", "#000000")])
         style.configure("TFrame", background=self.bg)
-        style.configure("TLabel", background=self.bg, foreground=self.fg, font=("JetBrainsMono Nerd Font", 11))
-        style.configure("TButton", background=self.accent, foreground="#000000", font=("JetBrainsMono Nerd Font", 10), borderwidth=0)
+        style.configure("TLabel", background=self.bg, foreground=self.fg,
+                        font=("JetBrainsMono Nerd Font", 11))
+        style.configure("Bold.TLabel", background=self.bg, foreground=self.fg,
+                        font=("JetBrainsMono Nerd Font", 12, "bold"))
+        style.configure("TButton", background=self.accent, foreground="#000000",
+                        font=("JetBrainsMono Nerd Font", 10, "bold"),
+                        borderwidth=0, padding=[14, 6])
         style.map("TButton", background=[("active", "#" + wal_color("color6"))])
-        style.configure("TScale", background=self.bg, troughcolor="#333333")
-        style.configure("TCheckbutton", background=self.bg, foreground=self.fg, font=("JetBrainsMono Nerd Font", 11))
+        style.configure("TScale", background=self.bg, troughcolor="#" + wal_color("color8"))
+        style.configure("TCheckbutton", background=self.bg, foreground=self.fg,
+                        font=("JetBrainsMono Nerd Font", 11))
+        style.configure("Red.TButton", background="#3C4346", foreground="#c1c2c3",
+                        font=("JetBrainsMono Nerd Font", 10, "bold"),
+                        borderwidth=0, padding=[14, 6])
+        style.map("Red.TButton", background=[("active", "#" + wal_color("color1"))])
+        style.configure("Green.TButton", background="#4A5254", foreground="#c1c2c3",
+                        font=("JetBrainsMono Nerd Font", 10, "bold"),
+                        borderwidth=0, padding=[14, 6])
+        style.map("Green.TButton", background=[("active", "#" + wal_color("color2"))])
 
         notebook = ttk.Notebook(self.root)
-        notebook.pack(fill="both", expand=True, padx=10, pady=10)
+        notebook.pack(fill="both", expand=True, padx=12, pady=12)
 
         self.page_theme(notebook)
         self.page_display(notebook)
         self.page_audio(notebook)
         self.page_power(notebook)
+        self.page_dotfiles(notebook)
         self.page_info(notebook)
 
         self.root.mainloop()
@@ -57,97 +73,155 @@ class SettingsApp:
         notebook.add(frame, text=title)
         return frame
 
-    def btn(self, parent, text, cmd):
-        b = ttk.Button(parent, text=text, command=cmd)
-        b.pack(pady=4)
+    def section(self, parent, text):
+        ttk.Label(parent, text=text, style="Bold.TLabel").pack(pady=(14, 4))
+
+    def btn(self, parent, text, cmd, style="TButton"):
+        b = ttk.Button(parent, text=text, command=cmd, style=style)
+        b.pack(pady=3)
         return b
 
     def _float_window(self):
         try:
-            addr = subprocess.getoutput("hyprctl activewindow -j | python3 -c \"import json,sys; print(json.load(sys.stdin).get('address',''))\"")
+            addr = subprocess.getoutput(
+                "hyprctl activewindow -j | python3 -c "
+                "\"import json,sys; print(json.load(sys.stdin).get('address',''))\""
+            )
             if addr:
                 subprocess.run(f"hyprctl dispatch setfloating address:{addr}", shell=True, capture_output=True)
                 subprocess.run(f"hyprctl dispatch centerwindow address:{addr}", shell=True, capture_output=True)
-                subprocess.run(f"hyprctl dispatch resizewindowpixel exact 700 500,address:{addr}", shell=True, capture_output=True)
+                subprocess.run(f"hyprctl dispatch resizewindowpixel exact 780 540,address:{addr}", shell=True, capture_output=True)
         except:
             pass
+
+    # ── Pages ──
 
     def page_theme(self, notebook):
         f = self.add_page(notebook, "    Theme  ")
 
-        ttk.Label(f, text="Wallpaper").pack(pady=(12, 2))
-        ttk.Button(f, text="    Change wallpaper", command=lambda: run("kitty ~/.local/bin/wallpaper")).pack(pady=2)
+        self.section(f, "Wallpaper")
+        self.btn(f, "    Change wallpaper", lambda: run("kitty ~/.local/bin/wallpaper-picker"))
+        self.btn(f, "  辰  Random wallpaper", lambda: run("~/.local/bin/random-wallpaper"))
 
-        ttk.Label(f, text="Pywal colors").pack(pady=(12, 2))
-        ttk.Button(f, text="    Regenerate colors", command=lambda: run("~/.local/bin/pywal-update-all")).pack(pady=2)
+        self.section(f, "Colors")
+        self.btn(f, "    Regenerate from wallpaper", lambda: run("~/.local/bin/pywal-update-all"))
+        self.btn(f, "    Edit palette manually", lambda: run("kitty -e ~/.local/bin/colors-edit"))
+        self.btn(f, "    Show palette", lambda: run("kitty -e pywal-swatch"))
 
-        ttk.Label(f, text="GTK Theme").pack(pady=(12, 2))
-        ttk.Button(f, text="    nwg-look (GTK settings)", command=lambda: run("nwg-look")).pack(pady=2)
-
-        ttk.Label(f, text="App Launcher").pack(pady=(12, 2))
-        launcher = tk.StringVar(value=get_launcher())
-        lf = ttk.Frame(f)
-        lf.pack()
-        ttk.Radiobutton(lf, text="    wofi", variable=launcher, value="wofi",
-            command=lambda: set_launcher(launcher.get())).pack(side="left", padx=8)
-        ttk.Radiobutton(lf, text="    rofi", variable=launcher, value="rofi",
-            command=lambda: set_launcher(launcher.get())).pack(side="left", padx=8)
-
-        ttk.Label(f, text="Font size").pack(pady=(12, 2))
-        fs_frame = ttk.Frame(f)
-        fs_frame.pack()
-        ttk.Button(fs_frame, text="  +  ", command=lambda: change_font(1)).pack(side="left", padx=4)
-        ttk.Button(fs_frame, text="  -  ", command=lambda: change_font(-1)).pack(side="left", padx=4)
+        self.section(f, "Interface")
+        self.btn(f, "    GTK settings (nwg-look)", lambda: run("nwg-look"))
 
     def page_display(self, notebook):
         f = self.add_page(notebook, "    Display  ")
 
-        ttk.Label(f, text="Brightness").pack(pady=(12, 2))
+        self.section(f, "Brightness")
         bright = tk.DoubleVar(value=get_brightness())
-        scale = ttk.Scale(f, from_=1, to=100, variable=bright, command=lambda v: set_brightness(int(float(v))))
-        scale.pack(fill="x", padx=40, pady=4)
-        lbl = ttk.Label(f, textvariable=bright)
-        lbl.pack()
+        scale = ttk.Scale(f, from_=1, to=100, variable=bright,
+                          command=lambda v: set_brightness(int(float(v))))
+        scale.pack(fill="x", padx=50, pady=2)
+        ttk.Label(f, textvariable=bright).pack()
 
-        ttk.Label(f, text="Blur (hyprlock)").pack(pady=(12, 2))
-        self.btn(f, "    Toggle blur", lambda: toggle_blur())
-
-        ttk.Label(f, text="Animations").pack(pady=(12, 2))
+        self.section(f, "Screen effects")
+        self.btn(f, "    Toggle blur (hyprlock)", lambda: toggle_blur())
         self.btn(f, "  ﱿ  Toggle animations", lambda: toggle_animations())
+        self.btn(f, "    Toggle night mode", lambda: run("~/.local/bin/night-mode"))
+
+        self.section(f, "Monitors")
+        self.btn(f, "    Display manager", lambda: run("~/.local/bin/display-manager"))
 
     def page_audio(self, notebook):
         f = self.add_page(notebook, "    Audio  ")
 
-        ttk.Label(f, text="Volume").pack(pady=(12, 2))
+        self.section(f, "Volume")
         vol = tk.DoubleVar(value=get_volume())
-        scale = ttk.Scale(f, from_=0, to=150, variable=vol, command=lambda v: set_volume(int(float(v))))
-        scale.pack(fill="x", padx=40, pady=4)
-        lbl = ttk.Label(f, textvariable=vol)
-        lbl.pack()
+        scale = ttk.Scale(f, from_=0, to=150, variable=vol,
+                          command=lambda v: set_volume(int(float(v))))
+        scale.pack(fill="x", padx=50, pady=2)
+        ttk.Label(f, textvariable=vol).pack()
 
-        ttk.Label(f, text="Output").pack(pady=(12, 2))
-        self.btn(f, "    Toggle mute", lambda: run("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle && notify-send 'Audio' 'Mute toggled'"))
+        self.btn(f, "    Toggle mute",
+                 lambda: run("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
+        self.btn(f, "    Toggle mic",
+                 lambda: run("~/.local/bin/mic-toggle"))
+
+        self.section(f, "Mixer")
+        self.btn(f, "  蓼  TUI mixer (pulsemixer)",
+                 lambda: run("kitty -e pulsemixer"))
+        self.btn(f, "  蓼  GUI mixer (pavucontrol)",
+                 lambda: run("pavucontrol"))
 
     def page_power(self, notebook):
         f = self.add_page(notebook, "    Power  ")
 
-        ttk.Label(f, text="Idle timeout").pack(pady=(12, 2))
-        self.btn(f, "    Edit hypridle.conf", lambda: run(f"kitty -e nvim {HOME}/.config/hypr/hypridle.conf"))
+        self.section(f, "Power profile")
+        self.btn(f, "    Switch CPU governor",
+                 lambda: run("~/.local/bin/power-profile"))
 
-        ttk.Label(f, text="Auto-suspend").pack(pady=(12, 2))
-        self.btn(f, "    Toggle idle inhibit", lambda: run(f"{HOME}/.local/bin/idle-inhibit"))
+        self.section(f, "Idle management")
+        self.btn(f, "    Edit idle config",
+                 lambda: run(f"kitty -e nvim {HOME}/.config/hypr/hypridle.conf"))
+        self.btn(f, "    Toggle idle inhibit",
+                 lambda: run("~/.local/bin/idle-inhibit"))
 
-        ttk.Label(f, text="Session").pack(pady=(12, 2))
+        self.section(f, "Session")
         self.btn(f, "    Lock screen", lambda: run("hyprlock"))
         bf = ttk.Frame(f)
+        bf.pack(pady=6)
+        ttk.Button(bf, text="    Reboot  ", command=lambda: run("systemctl reboot"),
+                   style="Red.TButton").pack(side="left", padx=6)
+        ttk.Button(bf, text="    Shutdown  ", command=lambda: run("systemctl poweroff"),
+                   style="Red.TButton").pack(side="left", padx=6)
+
+    def page_dotfiles(self, notebook):
+        f = self.add_page(notebook, "    Dotfiles  ")
+
+        self.section(f, "Repository")
+        self.btn(f, "    Open dotfiles TUI updater",
+                 lambda: run("kitty -e ~/.local/bin/dotfiles-updater"))
+        self.btn(f, "    Quick commit + push",
+                 lambda: quick_sync())
+
+        self.section(f, "Status")
+        status = subprocess.getoutput(
+            "cd ~/dotfiles 2>/dev/null && git status --short 2>/dev/null | head -20 || echo 'N/A'"
+        )
+        text = tk.Text(f, wrap="none", bg=self.surface, fg=self.fg,
+                       font=("JetBrainsMono Nerd Font", 10), relief="flat",
+                       bd=0, padx=10, pady=10, height=6)
+        text.insert("1.0", status if status else "✓ Up to date")
+        text.configure(state="disabled")
+        text.pack(fill="both", expand=True, padx=10, pady=4)
+
+        self.section(f, "Tools")
+        bf = ttk.Frame(f)
         bf.pack(pady=4)
-        ttk.Button(bf, text="    Reboot  ", command=lambda: run("systemctl reboot")).pack(side="left", padx=4)
-        ttk.Button(bf, text="    Shutdown  ", command=lambda: run("systemctl poweroff")).pack(side="left", padx=4)
+        ttk.Button(bf, text="    Status  ",
+                   command=lambda: run("kitty -e bash -c 'cd ~/dotfiles && git status && read'")
+                   ).pack(side="left", padx=4)
+        ttk.Button(bf, text="    Log  ",
+                   command=lambda: run("kitty -e bash -c 'cd ~/dotfiles && git log --oneline -20 && read'")
+                   ).pack(side="left", padx=4)
+        ttk.Button(bf, text="    Push  ",
+                   command=lambda: run("cd ~/dotfiles && git push"))
+        bf2 = ttk.Frame(f)
+        bf2.pack(pady=4)
+        ttk.Button(bf2, text="    Open in lazygit  ",
+                   command=lambda: run("kitty -e bash -c 'cd ~/dotfiles && lazygit'")
+                   ).pack(side="left", padx=4)
+
+        self.section(f, "Install / Update")
+        self.btn(f, "    Re-run install.sh",
+                 lambda: run("kitty -e bash ~/dotfiles/install.sh"))
 
     def page_info(self, notebook):
         f = self.add_page(notebook, "    Info  ")
-        info = subprocess.getoutput("fastfetch --pipe -s title -s os -s kernel -s uptime -s packages -s shell -s de -s theme -s icons -s font -s gpu -s cpu -s memory 2>/dev/null | head -20")
-        text = tk.Text(f, wrap="word", bg=self.bg, fg=self.fg, font=("JetBrainsMono Nerd Font", 10), relief="flat", bd=0, padx=10, pady=10)
+        info = subprocess.getoutput(
+            "fastfetch --pipe -s title -s os -s kernel -s uptime -s packages "
+            "-s shell -s de -s theme -s icons -s font -s gpu -s cpu -s memory 2>/dev/null | head -20"
+        )
+        text = tk.Text(f, wrap="word", bg=self.surface, fg=self.fg,
+                       font=("JetBrainsMono Nerd Font", 10), relief="flat",
+                       bd=0, padx=12, pady=12)
         text.insert("1.0", info)
         text.configure(state="disabled")
         text.pack(fill="both", expand=True, padx=10, pady=10)
@@ -155,25 +229,17 @@ class SettingsApp:
 def run(cmd):
     subprocess.Popen(f"exec {cmd}", shell=True)
 
-def get_launcher():
-    try:
-        with open(f"{HOME}/.config/launcher.txt") as f:
-            return f.read().strip()
-    except:
-        return "rofi"
-
-def set_launcher(choice):
-    try:
-        with open(f"{HOME}/.config/launcher.txt", "w") as f:
-            f.write(choice)
-        subprocess.run(["hyprctl", "reload"], capture_output=True)
-        notify_send("Launcher", f"Switched to {choice}")
-    except Exception as e:
-        notify_send("Error", str(e))
-        subprocess.run(["hyprctl", "reload"], capture_output=True)
-        notify_send("Launcher", f"Switched to {choice}")
-    except Exception as e:
-        notify_send("Error", str(e))
+def quick_sync():
+    os.chdir(f"{HOME}/dotfiles")
+    r = subprocess.run("git status --short", shell=True, capture_output=True, text=True)
+    if not r.stdout.strip():
+        subprocess.run(["notify-send", "Dotfiles", "Nothing to commit"])
+        return
+    subprocess.run(
+        f"cd {HOME}/dotfiles && git add -A && git commit -m 'sync $(date +%H:%M)' && git push",
+        shell=True, capture_output=True
+    )
+    subprocess.run(["notify-send", "Dotfiles", "Committed and pushed"])
 
 def get_brightness():
     try:
@@ -198,24 +264,6 @@ def get_volume():
 def set_brightness(v):
     subprocess.run(f"brightnessctl set {v}% && swayosd-client --brightness {v}", shell=True)
 
-def change_font(delta):
-    kitty = f"{HOME}/.config/kitty/kitty.conf"
-    try:
-        with open(kitty) as f:
-            lines = f.readlines()
-        for i, line in enumerate(lines):
-            if line.startswith("font_size "):
-                size = float(line.split()[1])
-                new_size = max(8, size + delta)
-                lines[i] = f"font_size {new_size}\n"
-                break
-        with open(kitty, "w") as f:
-            f.writelines(lines)
-        subprocess.run(["killall", "-SIGUSR1", "kitty"], capture_output=True)
-        notify_send("Font size", f"Kitty font: {new_size}")
-    except:
-        pass
-
 def toggle_blur():
     hypr = f"{HOME}/.config/hypr/hyprlock.conf"
     try:
@@ -223,10 +271,10 @@ def toggle_blur():
             c = f.read()
         if "blur_passes = 0" in c:
             c = c.replace("blur_passes = 0", "blur_passes = 4")
-            notify_send("Blur", "Enabled")
+            subprocess.run(["notify-send", "Blur", "Enabled"])
         else:
             c = c.replace("blur_passes = 4", "blur_passes = 0")
-            notify_send("Blur", "Disabled")
+            subprocess.run(["notify-send", "Blur", "Disabled"])
         with open(hypr, "w") as f:
             f.write(c)
     except:
@@ -239,17 +287,14 @@ def toggle_animations():
             c = f.read()
         if "enabled = true" in c:
             c = c.replace("enabled = true", "enabled = false")
-            notify_send("Animations", "Disabled")
+            subprocess.run(["notify-send", "Animations", "Disabled"])
         else:
             c = c.replace("enabled = false", "enabled = true")
-            notify_send("Animations", "Enabled")
+            subprocess.run(["notify-send", "Animations", "Enabled"])
         with open(anim, "w") as f:
             f.write(c)
     except:
         pass
-
-def notify_send(title, msg):
-    subprocess.run(["notify-send", title, msg], capture_output=True)
 
 if __name__ == "__main__":
     SettingsApp()

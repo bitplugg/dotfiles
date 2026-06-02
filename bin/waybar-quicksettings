@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Waybar module: quick settings indicator
+echo "{\"text\": \"\", \"tooltip\": \"Quick Settings\", \"class\": \"quicksettings\"}"

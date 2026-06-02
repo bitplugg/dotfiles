@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Human-readable hyprctl info
+
+echo "󰣇 Hyprland Summary"
+echo ""
+
+echo " Monitors:"
+hyprctl monitors -j 2>/dev/null | python3 -c "
+import sys, json
+mons = json.load(sys.stdin)
+for m in mons:
+    print(f'  {m[\"name\"]}: {m[\"width\"]}x{m[\"height\"]} @ {m[\"refreshRate\"]}Hz  (x: {m[\"x\"]}, y: {m[\"y\"]})')
+"
+
+echo ""
+echo " Workspaces:"
+hyprctl workspaces -j 2>/dev/null | python3 -c "
+import sys, json
+ws = json.load(sys.stdin)
+for w in sorted(ws, key=lambda x: x['id']):
+    clients = w.get('windows', 0)
+    print(f'  {w[\"id\"]}: {clients} windows  (monitor: {w.get(\"monitor\", \"?\")})')
+"
+
+echo ""
+echo " Active window:"
+hyprctl activewindow -j 2>/dev/null | python3 -c "
+import sys, json
+w = json.load(sys.stdin)
+print(f'  {w.get(\"title\", \"?\")}  ({w.get(\"class\", \"?\")})')
+"
+
+echo ""
+echo "Keyboard layout: $(hyprctl devices -j 2>/dev/null | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+for k in d.get('keyboards', []):
+    if 'video-bus' in k.get('name', '') or 'at-translated' in k.get('name', ''):
+        print(k.get('active_keymap', '?').split()[0])
+        break
+")"

@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# fzf project switcher for tmux
+# Opens projects from ~/projects/, ~/dev/, ~/dotfiles, etc.
+
+SEARCH_DIRS=(
+    "$HOME/projects"
+    "$HOME/dev"
+    "$HOME/dotfiles"
+    "$HOME/.config"
+)
+
+# Find directories with .git
+dirs=$(find "${SEARCH_DIRS[@]}" -maxdepth 3 -name ".git" -type d 2>/dev/null | sed 's|/\.git||' | sort -u)
+[ -z "$dirs" ] && dirs=$(find "${SEARCH_DIRS[@]}" -maxdepth 2 -type d 2>/dev/null | grep -v node_modules | sort -u)
+
+selected=$(echo "$dirs" | fzf --preview="ls -la {}" --preview-window=right:40% --height=60% --header="Select project")
+
+[ -z "$selected" ] && exit 0
+
+name=$(basename "$selected")
+if tmux has-session -t "$name" 2>/dev/null; then
+    tmux switch-client -t "$name"
+else
+    tmux new-session -d -s "$name" -c "$selected"
+    tmux switch-client -t "$name"
+fi

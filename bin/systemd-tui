@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Systemd service manager via wofi
+
+UNIT=$(systemctl list-units --type=service --state=running --no-legend 2>/dev/null | awk '{print $1}' | \
+    wofi --dmenu -p "Service" 2>/dev/null)
+[ -z "$UNIT" ] && exit 0
+
+ACTION=$(printf "status\nrestart\nstop\nlogs" | wofi --dmenu -p "$UNIT" 2>/dev/null)
+[ -z "$ACTION" ] && exit 0
+
+case "$ACTION" in
+    status) notify-send "$UNIT" "$(systemctl status "$UNIT" 2>/dev/null | head -10)" ;;
+    restart) systemctl restart "$UNIT" 2>/dev/null && notify-send "Systemd" "Restarted $UNIT" ;;
+    stop) systemctl stop "$UNIT" 2>/dev/null && notify-send "Systemd" "Stopped $UNIT" ;;
+    logs) kitty --class=floating-term -e journalctl -u "$UNIT" -f ;;
+esac

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# WiFi manager via wofi (nmcli wrapper)
+
+CHOICE=$(printf "  Scan\n  Connect (saved)\n  Disconnect\n  Turn WiFi off\n  Turn WiFi on\n  Show connection info" | \
+    wofi --dmenu -p "Network" 2>/dev/null)
+[ -z "$CHOICE" ] && exit 0
+
+case "$CHOICE" in
+    *Scan*)
+        kitty --class=floating-term -e bash -c "nmcli dev wifi list --rescan yes 2>/dev/null | head -30; echo; read -p 'SSID to connect: ' ssid; [ -n \"\$ssid\" ] && nmcli dev wifi connect \"\$ssid\"" ;;
+    *Connect*)
+        SAVED=$(nmcli connection show 2>/dev/null | tail -n +2 | awk '{print $1}')
+        SSID=$(echo "$SAVED" | wofi --dmenu -p "Saved networks" 2>/dev/null)
+        [ -n "$SSID" ] && nmcli connection up "$SSID" 2>/dev/null && notify-send "Network" "Connected to $SSID" ;;
+    *Disconnect*)
+        nmcli radio wifi off 2>/dev/null && notify-send "Network" "Disconnected" ;;
+    *off*) nmcli radio wifi off 2>/dev/null && notify-send "WiFi" "Off" ;;
+    *on*)  nmcli radio wifi on 2>/dev/null && notify-send "WiFi" "On" ;;
+    *info*)
+        INFO=$(nmcli device show 2>/dev/null | grep -E "GENERAL.STATE|IP4.ADDRESS|GENERAL.TYPE" | head -10)
+        notify-send "Network info" "$INFO" ;;
+esac

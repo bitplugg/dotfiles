@@ -23,7 +23,6 @@ Neovim, AI-агенты, аудио-визуализация, GTK-виджеты
 | **AI Gateway** | OpenClaw | Mistral AI + Telegram |
 | **Search** | SearXNG | Приватный мета-поиск |
 | **Audio Viz** | Cava | Визуализатор |
-| **Widgets** | AGS | GTK4/TS бары |
 | **Wallpaper Picker** | fzf + chafa | Выбор обоев в терминале |
 | **Colors** | pywal16 | Авто-цвета от обоев |
 | **Wallpaper** | Awww | Плавная смена |
@@ -39,7 +38,7 @@ git clone https://github.com/bitplugg/dotfiles.git ~/dotfiles
 cd ~/dotfiles && chmod +x install.sh && ./install.sh
 ```
 
-Установщик: пакеты (system + AUR), AGS из исходников, Fisher + Tide, симлинки, pywal.
+Установщик: пакеты (system + AUR), Fisher + Tide, симлинки, pywal.
 
 После установки: `Super + M` (перезагрузка), `Super+W` (выбор обоев).
 
@@ -53,7 +52,6 @@ cd ~/dotfiles && chmod +x install.sh && ./install.sh
 | `Super+V` | Float toggle |
 | `Super+R/D` | App launcher |
 | `Super+W` | Wallpaper picker |
-| `Super+A` | AGS bar toggle |
 | `Super+E` | Файловый менеджер |
 | `Super+O` | OpenClaw launcher |
 | `Super+L` | Блокировка |
@@ -86,7 +84,6 @@ cd ~/dotfiles && chmod +x install.sh && ./install.sh
 ├── kitty/          # Терминал
 ├── nvim/           # Neovim (lazy.nvim)
 ├── fish/           # Fish shell
-├── ags/            # AGS бар
 ├── fastfetch/      # 10 пресетов
 ├── cava/           # Аудио-визуализатор
 ~/.local/bin/       # 40+ скриптов
@@ -94,7 +91,7 @@ cd ~/dotfiles && chmod +x install.sh && ./install.sh
 
 ## 🔗 Credits
 
-[Hyprland](https://hyprland.org) · [pywal16](https://github.com/eylles/pywal16) · [AGS](https://github.com/Aylur/ags) · [OpenClaw](https://opencode.ai) · [SearXNG](https://docs.searxng.org) · [Catppuccin](https://github.com/catppuccin) · [Bibata](https://github.com/ful1e5/Bibata_Cursor)
+[Hyprland](https://hyprland.org) · [pywal16](https://github.com/eylles/pywal16) · [OpenClaw](https://opencode.ai) · [SearXNG](https://docs.searxng.org) · [Catppuccin](https://github.com/catppuccin) · [Bibata](https://github.com/ful1e5/Bibata_Cursor)
 
 ---
 

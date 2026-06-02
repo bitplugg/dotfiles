@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Screenshot → annotate in swappy
+
+TMP=$(mktemp /tmp/screenshot-XXXXXX.png)
+hyprshot -m region -o /tmp -f "$(basename "$TMP")" 2>/dev/null
+[ ! -f "$TMP" ] && exit 1
+
+swappy -f "$TMP" -o "$HOME/Pictures/screenshots/$(date +%Y%m%d_%H%M%S).png" 2>/dev/null
+rm -f "$TMP"

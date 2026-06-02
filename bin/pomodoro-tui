@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Простой Pomodoro таймер с notify-send
+
+CHOICE=$(printf "25:5 (Pomodoro)\n50:10 (Extended)\n90:15 (Hack)" | wofi --dmenu -p "Timer" 2>/dev/null)
+[ -z "$CHOICE" ] && exit 0
+
+case "$CHOICE" in
+    *25*) WORK=25; BREAK=5 ;;
+    *50*) WORK=50; BREAK=10 ;;
+    *90*) WORK=90; BREAK=15 ;;
+    *) exit 1 ;;
+esac
+
+notify-send "Pomodoro" "Working $WORK min"
+
+while true; do
+    sleep "${WORK}m"
+    notify-send -u critical "Pomodoro" "Break $BREAK min!" && canberra-gtk-play -i complete 2>/dev/null
+    sleep "${BREAK}m"
+    notify-send -u critical "Pomodoro" "Back to work!" && canberra-gtk-play -i complete 2>/dev/null
+done

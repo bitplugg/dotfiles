@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Web search from terminal — opens browser with query
+# Usage: search "query" or search (interactive)
+
+QUERY="$*"
+[ -z "$QUERY" ] && printf "Search: " && read -r QUERY
+[ -z "$QUERY" ] && exit 0
+
+# URL-encode the query
+ENCODED=$(python3 -c "import urllib.parse; print(urllib.parse.quote('$QUERY'))")
+
+ENGINE=$(printf "google\nduckduckgo\ngithub\nwiki\narch wiki" | wofi --dmenu -p "Search engine")
+
+case "$ENGINE" in
+    google)     xdg-open "https://www.google.com/search?q=$ENCODED" ;;
+    duckduckgo) xdg-open "https://duckduckgo.com/?q=$ENCODED" ;;
+    github)     xdg-open "https://github.com/search?q=$ENCODED" ;;
+    wiki)       xdg-open "https://en.wikipedia.org/wiki/$ENCODED" ;;
+    "arch wiki") xdg-open "https://wiki.archlinux.org/index.php?search=$ENCODED" ;;
+esac

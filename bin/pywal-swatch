@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Show current pywal color palette in terminal
+
+JSON="$HOME/.cache/wal/colors.json"
+[ ! -f "$JSON" ] && echo "No pywal colors" && exit 1
+
+echo "  Current pywal palette"
+echo ""
+
+for i in $(seq 0 15); do
+    hex=$(jq -r ".colors.color$i" "$JSON")
+    # Use the terminal background/foreground awareness
+    if [ "$i" -eq 0 ]; then
+        fg=7
+    elif [ "$i" -eq 7 ]; then
+        fg=0
+    else
+        fg=15
+    fi
+    printf "\e[48;5;${i}m\e[38;5;${fg}m  %-2d %s  \e[0m  " "$i" "$hex"
+    # 8 colors per line
+    [ "$i" -eq 7 ] && echo ""
+done
+echo ""
+echo ""
+echo "  Special:"
+bg=$(jq -r '.special.background' "$JSON")
+fg=$(jq -r '.special.foreground' "$JSON")
+cc=$(jq -r '.special.cursor' "$JSON")
+echo "  Background: $bg   Foreground: $fg   Cursor: $cc"

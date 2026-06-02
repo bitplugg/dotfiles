@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Create/switch git branches for dotfiles
+
+cd "$HOME/dotfiles" 2>/dev/null || { echo "No dotfiles repo"; exit 1; }
+
+CURRENT=$(git branch --show-current 2>/dev/null)
+BRANCHES=$(git branch 2>/dev/null | sed 's/^..//')
+ACTION=$(printf "  Switch branch\n  Create branch\n  Delete branch" | wofi --dmenu -p "dotfiles ($CURRENT)" 2>/dev/null)
+[ -z "$ACTION" ] && exit 0
+
+case "$ACTION" in
+    *Switch*)
+        BRANCH=$(echo "$BRANCHES" | wofi --dmenu -p "Switch to" 2>/dev/null)
+        [ -n "$BRANCH" ] && git checkout "$BRANCH" 2>/dev/null && notify-send "Dotfiles" "Switched to $BRANCH" ;;
+    *Create*)
+        NAME=$(wofi --dmenu -p "Branch name" < /dev/null 2>/dev/null)
+        [ -n "$NAME" ] && git checkout -b "$NAME" 2>/dev/null && notify-send "Dotfiles" "Created $NAME" ;;
+    *Delete*)
+        BRANCH=$(echo "$BRANCHES" | grep -v "\*" | grep -v main | grep -v master | wofi --dmenu -p "Delete" 2>/dev/null)
+        [ -n "$BRANCH" ] && git branch -D "$BRANCH" 2>/dev/null && notify-send "Dotfiles" "Deleted $BRANCH" ;;
+esac

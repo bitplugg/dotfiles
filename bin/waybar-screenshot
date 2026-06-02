@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Waybar module: screenshot button
+echo "{\"text\": \"\", \"tooltip\": \"Screenshot\", \"class\": \"screenshot\"}"

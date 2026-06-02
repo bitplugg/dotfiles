@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Set a random wallpaper from collection
+
+WALLPAPER_DIR="$HOME/Pictures/wallpapers"
+[ ! -d "$WALLPAPER_DIR" ] && echo "No wallpapers" && exit 1
+
+img=$(find "$WALLPAPER_DIR" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) | shuf -n 1)
+[ -z "$img" ] && echo "No images" && exit 1
+
+~/.local/bin/wallpaper "$img"

@@ -4,9 +4,9 @@
     "margin-top": 6,
     "margin-left": 6,
     "margin-right": 6,
-    "modules-left": ["custom/launcher", "hyprland/workspaces", "custom/idleinhibitor", "custom/colorpicker", "custom/cava", "custom/ags", "custom/updates", "cpu", "memory", "custom/weather"],
-    "modules-center": ["hyprland/window", "custom/media"],
-    "modules-right": ["pulseaudio", "custom/mic", "custom/nightmode", "network", "bluetooth", "battery", "clock", "tray", "custom/power"],
+    "modules-left": ["custom/launcher", "hyprland/workspaces", "custom/idleinhibitor", "custom/colorpicker", "custom/cava", "custom/quicksettings", "custom/updates", "cpu", "memory", "custom/weather"],
+    "modules-center": ["hyprland/window", "custom/media", "custom/screenshot"],
+    "modules-right": ["pulseaudio", "custom/mic", "custom/nightmode", "network", "bluetooth", "custom/keyboard", "battery", "clock", "tray", "custom/power"],
     "hyprland/workspaces": {
         "format": "{icon}",
         "format-icons": {
@@ -72,11 +72,13 @@
     },
     "cpu": {
         "format": " {usage}%",
-        "interval": 5
+        "interval": 5,
+        "on-click": "kitty --class=floating-term -e btop"
     },
     "memory": {
         "format": " {}%",
-        "interval": 10
+        "interval": 10,
+        "on-click": "kitty --class=floating-term -e btop"
     },
     "battery": {
         "format": "{icon} {capacity}%",
@@ -131,13 +133,29 @@
         "on-click": "~/.local/bin/cava-toggle",
         "tooltip": false
     },
-    "custom/ags": {
-        "exec": "~/.local/bin/ags-launcher status",
-        "interval": 30,
-        "signal": 5,
+    "custom/quicksettings": {
+        "exec": "~/.local/bin/waybar-quicksettings",
+        "return-type": "json",
+        "interval": 60,
         "format": "{}",
-        "on-click": "~/.local/bin/ags-launcher toggle",
-        "tooltip": false
+        "on-click": "~/.local/bin/quicksettings-menu",
+        "tooltip": true
+    },
+    "custom/screenshot": {
+        "exec": "~/.local/bin/waybar-screenshot",
+        "return-type": "json",
+        "interval": 0,
+        "format": "{}",
+        "on-click": "~/.local/bin/screenshot-menu",
+        "tooltip": true
+    },
+    "custom/keyboard": {
+        "exec": "~/.local/bin/waybar-keyboard",
+        "return-type": "json",
+        "interval": 5,
+        "format": "{}",
+        "on-click": "hyprctl switchxkblayout at-translated-set-2-keyboard next",
+        "tooltip": true
     },
     "custom/updates": {
         "exec": "~/.local/bin/waybar-updates",

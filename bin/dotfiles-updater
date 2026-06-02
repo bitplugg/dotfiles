@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+# TUI dotfiles updater — commit & push with whiptail
+
+set -e
+DOTFILES="$HOME/dotfiles"
+cd "$DOTFILES" || { whiptail --msgbox "dotfiles not found" 8 40; exit 1; }
+
+main_menu() {
+    while true; do
+        CHOICE=$(whiptail --title "dotfiles-updater" --menu "Choose action:" 20 60 10 \
+            "1" "Status — show changed files" \
+            "2" "Diff — view changes" \
+            "3" "Commit — add all + commit" \
+            "4" "Push — push to origin" \
+            "5" "Pull — pull from origin" \
+            "6" "Log — last 10 commits" \
+            "7" "Sync — commit + push" \
+            "8" "Exit" 3>&1 1>&2 2>&3)
+
+        [ -z "$CHOICE" ] && exit 0
+
+        case "$CHOICE" in
+            1) show_status ;;
+            2) show_diff ;;
+            3) do_commit ;;
+            4) do_push ;;
+            5) do_pull ;;
+            6) show_log ;;
+            7) do_sync ;;
+            8) exit 0 ;;
+        esac
+    done
+}
+
+show_status() {
+    whiptail --title "Status" --textbox /dev/stdin 20 80 <<< "$(git status --short 2>/dev/null || echo 'Clean')"
+}
+
+show_diff() {
+    git diff --color=never 2>/dev/null | head -200 > /tmp/dotdiff.txt
+    if [ -s /tmp/dotdiff.txt ]; then
+        whiptail --title "Diff" --textbox /tmp/dotdiff.txt 20 80
+    else
+        whiptail --msgbox "No changes to show" 8 40
+    fi
+}
+
+do_commit() {
+    CHANGED=$(git status --short 2>/dev/null | wc -l)
+    if [ "$CHANGED" -eq 0 ]; then
+        whiptail --msgbox "Nothing to commit" 8 40
+        return
+    fi
+
+    MSG=$(whiptail --inputbox "Commit message:" 8 60 "update" 3>&1 1>&2 2>&3)
+    [ -z "$MSG" ] && return
+
+    git add -A 2>/dev/null
+    if git commit -m "$MSG" 2>/dev/null; then
+        whiptail --msgbox "✓ Committed: $MSG" 8 40
+    else
+        whiptail --msgbox "Commit failed" 8 40
+    fi
+}
+
+do_push() {
+    whiptail --title "Push" --yesno "Push to origin?" 8 40 || return
+    OUTPUT=$(git push 2>&1)
+    whiptail --msgbox "$OUTPUT" 12 60
+}
+
+do_pull() {
+    whiptail --title "Pull" --yesno "Pull from origin?" 8 40 || return
+    OUTPUT=$(git pull --rebase 2>&1)
+    whiptail --msgbox "$OUTPUT" 12 60
+}
+
+show_log() {
+    git log --oneline -10 --color=never 2>/dev/null > /tmp/dotlog.txt
+    whiptail --title "Last 10 commits" --textbox /tmp/dotlog.txt 12 80
+}
+
+do_sync() {
+    CHANGED=$(git status --short 2>/dev/null | wc -l)
+    if [ "$CHANGED" -gt 0 ]; then
+        MSG=$(whiptail --inputbox "Commit message:" 8 60 "sync" 3>&1 1>&2 2>&3)
+        [ -z "$MSG" ] && return
+        git add -A && git commit -m "$MSG" 2>/dev/null
+    fi
+    OUTPUT=$(git push 2>&1)
+    whiptail --msgbox "✓ Sync complete\n\n$OUTPUT" 12 60
+}
+
+main_menu

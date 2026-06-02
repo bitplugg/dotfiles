@@ -1,14 +1,33 @@
 #!/usr/bin/env bash
-# Launch wallpaper picker via AGS
-cd ~/.config/ags
+# Floating terminal wallpaper picker using fzf + chafa preview
+# Launches in a floating Kitty window
 
-INSTANCE="ags-wallpaper-picker"
+WALLPAPER_DIR="$HOME/Pictures/wallpapers"
+SCRIPT="/tmp/wallpaper-pick-inner.sh"
 
-# Toggle: if running, close it
-if ags list 2>/dev/null | grep -q "$INSTANCE"; then
-    ags quit "$INSTANCE" 2>/dev/null
-    exit 0
+cat > "$SCRIPT" << 'INNER'
+#!/usr/bin/env bash
+WALLPAPER_DIR="$HOME/Pictures/wallpapers"
+mapfile -d '' FILES < <(find "$WALLPAPER_DIR" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.gif' -o -iname '*.bmp' -o -iname '*.webp' \) -print0 | sort -z)
+if [ ${#FILES[@]} -eq 0 ]; then
+    echo "No images found in $WALLPAPER_DIR"
+    read -rp "Press Enter to exit"
+    exit 1
 fi
+SELECTED=$(printf '%s\n' "${FILES[@]}" | fzf \
+    --preview='chafa --symbols block --size 50x30 {}' \
+    --preview-window='right:55%' --height=80% --layout=reverse \
+    --border --prompt='Wallpaper > ' --header='Select wallpaper (ESC to quit)')
+if [ -n "$SELECTED" ]; then
+    ~/.local/bin/wallpaper "$SELECTED"
+    echo "Wallpaper set! ($(basename "$SELECTED"))"
+else
+    echo "Cancelled"
+fi
+read -rp "Press Enter to exit"
+INNER
 
-ags run wallpaper-picker.tsx "$@" &
-disown
+chmod +x "$SCRIPT"
+kitty --class=wallpaper-picker -e "$SCRIPT" & disown
+sleep 1
+rm -f "$SCRIPT"

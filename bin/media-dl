@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# yt-dlp wrapper via wofi — paste URL, pick format, download
+URL=$(wofi --dmenu -p "URL" < /dev/null 2>/dev/null)
+[ -z "$URL" ] && exit 0
+
+FORMAT=$(printf "best (mp4)\nbestaudio (mp3)\nbestaudio (opus)\nplaylist-audio\nplaylist-video" | wofi --dmenu -p "Format" 2>/dev/null)
+[ -z "$FORMAT" ] && exit 0
+
+cd ~/Downloads 2>/dev/null || mkdir -p ~/Downloads && cd ~/Downloads
+
+case "$FORMAT" in
+    *mp4*)   kitty --class=floating-term -e yt-dlp -f best "$URL" ;;
+    *mp3*)   kitty --class=floating-term -e yt-dlp -x --audio-format mp3 "$URL" ;;
+    *opus*)  kitty --class=floating-term -e yt-dlp -x --audio-format opus "$URL" ;;
+    *playlist-audio*) kitty --class=floating-term -e yt-dlp -x --audio-format mp3 --yes-playlist "$URL" ;;
+    *playlist-video*) kitty --class=floating-term -e yt-dlp -f best --yes-playlist "$URL" ;;
+esac
+
+notify-send "Download" "Started: $FORMAT"

@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Paru wrapper via wofi — search, install, remove
+
+CHOICE=$(printf "  Install package\n  Remove package\n  Update system\n  List orphans\n  Cache size" | \
+    wofi --dmenu -p "Pacman" 2>/dev/null)
+[ -z "$CHOICE" ] && exit 0
+
+case "$CHOICE" in
+    *Install*)
+        QUERY=$(wofi --dmenu -p "Search" < /dev/null 2>/dev/null)
+        [ -z "$QUERY" ] && exit 0
+        RESULTS=$(paru -Ss "$QUERY" 2>/dev/null | grep -v "^\s" | head -30)
+        [ -z "$RESULTS" ] && notify-send "Pacman" "No results" && exit 0
+        PKG=$(echo "$RESULTS" | wofi --dmenu -p "Select" 2>/dev/null | awk '{print $1}')
+        [ -z "$PKG" ] && exit 0
+        kitty --class=floating-term -e paru -S "$PKG" ;;
+    *Remove*)
+        INSTALLED=$(paru -Q 2>/dev/null | head -50)
+        PKG=$(echo "$INSTALLED" | wofi --dmenu -p "Remove" 2>/dev/null | awk '{print $1}')
+        [ -z "$PKG" ] && exit 0
+        kitty --class=floating-term -e paru -Rs "$PKG" ;;
+    *Update*) kitty --class=floating-term -e paru -Syu ;;
+    *Orphans*) ORPHANS=$(paru -Qdt 2>/dev/null | wc -l); kitty --class=floating-term -e bash -c "paru -Qdt; echo; [ $ORPHANS -gt 0 ] && read -p 'Remove orphans? (y/n) ' && [ \$REPLY = y ] && paru -Rns \$(paru -Qdtq)";;
+    *Cache*) kitty --class=floating-term -e bash -c "du -sh /var/cache/pacman/pkg/ 2>/dev/null; echo; read -p 'Clean cache? (y/n) ' && [ \$REPLY = y ] && paru -Sc" ;;
+esac

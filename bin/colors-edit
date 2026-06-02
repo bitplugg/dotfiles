@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Edit pywal colors.json in nvim, then regenerate all configs
+
+FILE="$HOME/.cache/wal/colors.json"
+[ ! -f "$FILE" ] && echo "No pywal colors" && exit 1
+
+$EDITOR "$FILE" 2>/dev/null || nvim "$FILE"
+
+pywal-update-all
+notify-send "Colors" "Updated all configs"

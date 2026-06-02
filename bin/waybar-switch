@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# Переключение waybar тем
+
+THEME_DIR="$HOME/dotfiles/waybar-themes"
+ACTIVE="$HOME/.config/waybar/style.css"
+ACTIVE_NAME_FILE="$HOME/.config/waybar/.active-theme"
+
+CURRENT="default"
+[ -f "$ACTIVE_NAME_FILE" ] && CURRENT=$(cat "$ACTIVE_NAME_FILE")
+
+# Build menu: render labels with active marker
+MENU=()
+NAMES=()
+while IFS='=' read -r LINE; do
+    LINE=$(echo "$LINE" | xargs)
+    [ -z "$LINE" ] || [ "${LINE:0:1}" = "#" ] && continue
+    NAME="${LINE%%=*}"
+    DESC="${LINE#*=}"
+    NAME=$(echo "$NAME" | xargs)
+    DESC=$(echo "$DESC" | xargs)
+    [ "$NAME" = "$CURRENT" ] && MARK="● " || MARK="  "
+    MENU+=("$MARK$NAME — $DESC")
+    NAMES+=("$NAME")
+done < "$THEME_DIR/themes.txt"
+
+CHOICE=$(printf '%s\n' "${MENU[@]}" | wofi --dmenu -p "Waybar theme" 2>/dev/null)
+[ -z "$CHOICE" ] && exit 0
+
+# Find index of choice
+IDX=-1
+for i in "${!MENU[@]}"; do
+    [ "${MENU[$i]}" = "$CHOICE" ] && IDX=$i && break
+done
+
+[ "$IDX" -eq -1 ] && notify-send "Waybar" "Invalid choice" && exit 1
+THEME="${NAMES[$IDX]}"
+[ "$THEME" = "$CURRENT" ] && exit 0
+
+CSS_SRC="$THEME_DIR/style-$THEME.css"
+[ ! -f "$CSS_SRC" ] && notify-send "Waybar" "Theme $THEME not found" && exit 1
+
+cp "$CSS_SRC" "$ACTIVE"
+if [ "$THEME" != "default" ]; then
+    sed -i "1i @import \"/home/bitplugg/.cache/wal/colors-waybar.css\";" "$ACTIVE"
+fi
+
+echo "$THEME" > "$ACTIVE_NAME_FILE"
+killall waybar 2>/dev/null
+sleep 0.3
+waybar &>/dev/null & disown
+notify-send "Waybar" "Theme: $THEME"

@@ -17,3 +17,6 @@ Thumbs.db
 *.swo
 *~
 *.log
+
+# tmux plugins (managed by TPM)
+tmux/plugins/

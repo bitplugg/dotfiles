@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Todo-list через wofi
+TODO="$HOME/todo.txt"
+[ ! -f "$TODO" ] && touch "$TODO"
+
+ACTION=$(printf "  Add\n  Done\n  Clear all\n  View" | wofi --dmenu -p "Todo" 2>/dev/null)
+[ -z "$ACTION" ] && exit 0
+
+case "$ACTION" in
+    *Add*)
+        TASK=$(wofi --dmenu -p "Task" < /dev/null 2>/dev/null)
+        [ -n "$TASK" ] && echo "[ ] $TASK" >> "$TODO" && notify-send "Todo" "Added"
+        ;;
+    *Done*)
+        ITEMS=$(cat "$TODO")
+        [ -z "$ITEMS" ] && notify-send "Todo" "Empty list" && exit 0
+        DONE=$(echo "$ITEMS" | wofi --dmenu -p "Done" 2>/dev/null)
+        [ -n "$DONE" ] && grep -v "$DONE" "$TODO" > /tmp/todo-tmp && mv /tmp/todo-tmp "$TODO" && notify-send "Todo" "Marked done"
+        ;;
+    *Clear*)
+        echo "" > "$TODO" && notify-send "Todo" "Cleared"
+        ;;
+    *View*)
+        kwrite "$TODO" 2>/dev/null || kitty -e nvim "$TODO"
+        ;;
+esac

@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# pre-commit hook: check for secrets/API keys before commit
+# Install: ln -sf ../../.githooks/pre-commit .git/hooks/pre-commit
+
+RED='\033[0;31m'
+NC='\033[0m'
+
+# Patterns that look like secrets
+SECRET_PATTERNS=(
+    'MISTRAL_API_KEY'
+    'sk-[a-zA-Z0-9]{20,}'
+    'api[_-]key[[:space:]]*=[[:space:]]*['"'"'"]?[a-zA-Z0-9]{16,}'
+    'token[[:space:]]*=[[:space:]]*['"'"'"]?[a-zA-Z0-9]{16,}'
+    'secret[[:space:]]*=[[:space:]]*['"'"'"]?[a-zA-Z0-9]{16,}'
+    'password[[:space:]]*=[[:space:]]*['"'"'"]?[a-zA-Z0-9]{8,}'
+    'ghp_[a-zA-Z0-9]{36}'
+    'gho_[a-zA-Z0-9]{36}'
+    'ghu_[a-zA-Z0-9]{36}'
+)
+
+FILES=$(git diff --cached --name-only --diff-filter=ACM)
+HAS_ERRORS=0
+
+for file in $FILES; do
+    [ -f "$file" ] || continue
+    # Skip binary files
+    case "$(file -b --mime-type "$file")" in
+        image/*|application/octet-stream) continue ;;
+    esac
+    for pattern in "${SECRET_PATTERNS[@]}"; do
+        if grep -Pn "$pattern" "$file" 2>/dev/null | grep -v "^[0-9]*:[[:space:]]*#" | grep -v "^[0-9]*:[[:space:]]*//" | grep -v "^[0-9]*:[[:space:]]*\*" | grep -q .; then
+            echo -e "${RED}[SECURITY]${NC} Possible secret found in $file: $(grep -Pn "$pattern" "$file" | head -3)"
+            HAS_ERRORS=1
+        fi
+    done
+    # Check for placeholder values that look real
+    if grep -q "WCdZm6o1v0haZeIkmGSIyo2AdTKwjKDX" "$file" 2>/dev/null; then
+        echo -e "${RED}[SECURITY]${NC} Real API key found in $file!"
+        HAS_ERRORS=1
+    fi
+done
+
+if [ "$HAS_ERRORS" -eq 1 ]; then
+    echo -e "${RED}Commit blocked. Remove secrets and try again.${NC}"
+    echo "If this is a false positive, use: git commit --no-verify"
+    exit 1
+fi

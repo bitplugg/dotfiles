@@ -1,0 +1,149 @@
+#!/usr/bin/env bash
+# TUI dotfiles settings — manage API keys, launcher, theme, etc.
+
+HOME="${HOME:-/home/bitplugg}"
+FISH_CONFIG="$HOME/.config/fish/config.fish"
+LAUNCHER_FILE="$HOME/.config/launcher.txt"
+GITCONFIG="$HOME/.gitconfig"
+LIVE_FISH="$HOME/.config/fish/config.fish"
+DOTFILES_FISH="$HOME/dotfiles/fish/config.fish"
+
+get_current_key() {
+    grep "MISTRAL_API_KEY" "$LIVE_FISH" 2>/dev/null | grep -v "\*\*\*" | grep -oP "'\K[^']*" | head -1
+    [ -z "$(grep "MISTRAL_API_KEY" "$LIVE_FISH" 2>/dev/null | grep -v "\*\*\*")" ] && echo "not set"
+}
+
+set_api_key() {
+    KEY=$(whiptail --inputbox "Enter Mistral API Key:" 8 60 "" 3>&1 1>&2 2>&3)
+    [ -z "$KEY" ] && return
+
+    for f in "$LIVE_FISH" "$DOTFILES_FISH"; do
+        if [ -f "$f" ]; then
+            if grep -q "MISTRAL_API_KEY" "$f" 2>/dev/null; then
+                sed -i "s|^set -x MISTRAL_API_KEY '.*'|set -x MISTRAL_API_KEY '$KEY'|" "$f"
+            else
+                echo "set -x MISTRAL_API_KEY '$KEY'" >> "$f"
+            fi
+        fi
+    done
+
+    # Also set in current session
+    export MISTRAL_API_KEY="$KEY"
+
+    # Set in systemd user
+    systemctl --user set-environment MISTRAL_API_KEY="$KEY" 2>/dev/null
+
+    whiptail --msgbox "✓ API key set\nFish configs updated\nSystemd env updated" 10 50
+}
+
+unset_api_key() {
+    if whiptail --yesno "Remove API key from configs?" 8 40; then
+        for f in "$LIVE_FISH" "$DOTFILES_FISH"; do
+            if [ -f "$f" ]; then
+                sed -i "s|^set -x MISTRAL_API_KEY '.*'|set -x MISTRAL_API_KEY '***'|" "$f"
+            fi
+        done
+        whiptail --msgbox "✓ API key removed (replaced with placeholder)" 8 50
+    fi
+}
+
+get_launcher() {
+    cat "$LAUNCHER_FILE" 2>/dev/null || echo "wofi"
+}
+
+set_launcher_tui() {
+    CHOICE=$(whiptail --title "App Launcher" --menu "Select launcher:" 12 40 2 \
+        "wofi" "Wofi (Wayland native)" \
+        "rofi" "Rofi (X11/Wayland)" 3>&1 1>&2 2>&3)
+    [ -z "$CHOICE" ] && return
+    echo "$CHOICE" > "$LAUNCHER_FILE"
+    hyprctl reload 2>/dev/null
+    whiptail --msgbox "✓ Launcher set to $CHOICE" 8 40
+}
+
+get_git_user() {
+    NAME=$(git config --global user.name 2>/dev/null || echo "not set")
+    EMAIL=$(git config --global user.email 2>/dev/null || echo "not set")
+    echo "Name: $NAME\nEmail: $EMAIL"
+}
+
+set_git_user() {
+    NAME=$(whiptail --inputbox "Git user name:" 8 60 "$(git config --global user.name 2>/dev/null)" 3>&1 1>&2 2>&3)
+    [ -z "$NAME" ] && return
+    EMAIL=$(whiptail --inputbox "Git email:" 8 60 "$(git config --global user.email 2>/dev/null)" 3>&1 1>&2 2>&3)
+    [ -z "$EMAIL" ] && return
+
+    git config --global user.name "$NAME"
+    git config --global user.email "$EMAIL"
+
+    # Update dotfiles gitconfig too
+    if [ -f "$HOME/dotfiles/gitconfig" ]; then
+        sed -i "s/^\tname = .*/\tname = $NAME/" "$HOME/dotfiles/gitconfig"
+        sed -i "s/^\temail = .*/\temail = $EMAIL/" "$HOME/dotfiles/gitconfig"
+    fi
+
+    whiptail --msgbox "✓ Git user updated" 8 40
+}
+
+regen_pywal() {
+    whiptail --msgbox "Regenerating pywal colors..." 8 40 &
+    ~/.local/bin/pywal-update-all 2>/dev/null
+    whiptail --msgbox "✓ Colors regenerated" 8 40
+}
+
+random_wallpaper() {
+    whiptail --msgbox "Setting random wallpaper..." 8 40 &
+    ~/.local/bin/random-wallpaper 2>/dev/null
+    whiptail --msgbox "✓ Random wallpaper set" 8 40
+}
+
+show_about() {
+    whiptail --title "About" --msgbox "dotfiles settings TUI\nbitplugg's Hyprland rice\n\n$(cat /etc/os-release 2>/dev/null | grep PRETTY_NAME | cut -d= -f2 | tr -d '\"')\n\nKernel: $(uname -r)\nHyprland: $(hyprctl version 2>/dev/null | head -1 | grep -oP '\d+\.\d+')" 15 50
+}
+
+while true; do
+    CURRENT_KEY=$(get_current_key)
+    CURRENT_LAUNCHER=$(get_launcher)
+    GIT_INFO=$(get_git_user | head -1)
+
+    CHOICE=$(whiptail --title "dotfiles-settings" --menu "
+API: ${CURRENT_KEY:0:16}...
+Git: $GIT_INFO
+Launcher: $CURRENT_LAUNCHER
+" 20 65 10 \
+        "1" "API Keys — set Mistral API key" \
+        "2" "Git — set user name/email" \
+        "3" "Launcher — switch rofi / wofi" \
+        "4" "Theme — regenerate pywal colors" \
+        "5" "Wallpaper — set random" \
+        "6" "Systemd — set env for services" \
+        "7" "About — system info" \
+        "8" "Exit" 3>&1 1>&2 2>&3)
+
+    [ -z "$CHOICE" ] && exit 0
+
+    case "$CHOICE" in
+        1)
+            while true; do
+                K=$(whiptail --title "API Keys" --menu "Mistral API key:" 12 50 3 \
+                    "1" "Set Mistral API key" \
+                    "2" "Remove/clear API key" \
+                    "3" "Back" 3>&1 1>&2 2>&3)
+                [ -z "$K" ] || [ "$K" = "3" ] && break
+                case "$K" in
+                    1) set_api_key ;;
+                    2) unset_api_key ;;
+                esac
+            done
+            ;;
+        2) set_git_user ;;
+        3) set_launcher_tui ;;
+        4) regen_pywal ;;
+        5) random_wallpaper ;;
+        6)
+            whiptail --msgbox "Systemd user env is set when you set the API key.\n\nCurrent env:\nMISTRAL_API_KEY=$(systemctl --user show-environment 2>/dev/null | grep MISTRAL || echo 'not set')" 12 60
+            ;;
+        7) show_about ;;
+        8) exit 0 ;;
+    esac
+done

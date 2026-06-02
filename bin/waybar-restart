@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Safely restart waybar
+
+pkill waybar 2>/dev/null
+sleep 0.3
+waybar & disown
+notify-send "Waybar" "Restarted"

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Поиск закладок Firefox через wofi
+
+PROFILE=$(ls ~/.mozilla/firefox/*.default* 2>/dev/null | head -1)
+[ -z "$PROFILE" ] && notify-send "Bookmarks" "Firefox profile not found" && exit 1
+
+DB="$PROFILE/places.sqlite"
+[ ! -f "$DB" ] && notify-send "Bookmarks" "places.sqlite not found" && exit 1
+
+# Копируем чтобы не блокировать Firefox
+CP="/tmp/firefox-bookmarks.sqlite"
+cp "$DB" "$CP" 2>/dev/null
+
+RESULTS=$(sqlite3 "$CP" "SELECT title, url FROM moz_bookmarks b JOIN moz_places h ON b.fk = h.id WHERE b.title != '' AND b.type = 1 LIMIT 500" 2>/dev/null | column -t -s'|' | head -80)
+[ -z "$RESULTS" ] && notify-send "Bookmarks" "No bookmarks found" && exit 1
+
+CHOICE=$(echo "$RESULTS" | wofi --dmenu -p "Bookmark" 2>/dev/null)
+[ -z "$CHOICE" ] && exit 0
+
+URL=$(echo "$CHOICE" | awk '{print $NF}')
+[ -n "$URL" ] && xdg-open "$URL" 2>/dev/null

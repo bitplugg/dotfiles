@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Unified system update
+echo "⟳ Updating system..."
+paru -Syu --noconfirm 2>&1 | tail -5
+
+echo ""
+echo "⟳ Updating pywal..."
+[ -f "$HOME/.cache/wal/colors.json" ] && pywal-update-all
+
+echo ""
+echo "⟳ Saving tmux session..."
+tmux run -t main 'set -g @resurrect-save-session-script "true"; save-session' 2>/dev/null || true
+
+echo ""
+echo "⟳ Dotfiles status:"
+dotfiles-status
+
+echo ""
+echo "✓ Update complete"

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Переключение аудиовыхода через wofi
+
+SINKS=$(pactl list sinks short 2>/dev/null | awk '{print $2}')
+[ -z "$SINKS" ] && notify-send "Audio" "No sinks found" && exit 1
+
+CHOICE=$(echo "$SINKS" | wofi --dmenu -p "Audio output" 2>/dev/null)
+[ -z "$CHOICE" ] && exit 0
+
+pactl set-default-sink "$CHOICE" && notify-send "Audio" "Output: $CHOICE"

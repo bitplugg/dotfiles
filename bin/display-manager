@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Display/monitor manager via wofi (wlr-randr)
+
+if ! command -v wlr-randr &>/dev/null; then
+    notify-send "Display" "Install wlr-randr"
+    exit 1
+fi
+
+OUTPUTS=$(wlr-randr 2>/dev/null)
+
+CHOICE=$(echo "$OUTPUTS" | grep -E "^\S+" | while read -r name; do
+    res=$(wlr-randr 2>/dev/null | grep -A10 "^$name " | grep -oP '\d+x\d+' | head -1)
+    enabled=$(wlr-randr 2>/dev/null | grep -A10 "^$name " | grep -q "Enabled: yes" && echo "" || echo "")
+    echo "$enabled $name ($res)"
+done | wofi --dmenu -p "Display")
+
+[ -z "$CHOICE" ] && exit 0
+
+MON=$(echo "$CHOICE" | awk '{print $2}')
+
+OPTIONS=$(printf "  Main\n  Extend right\n  Extend left\n  Mirror\n  Disable\n  Auto" | \
+    wofi --dmenu -p "$MON")
+
+case "$OPTIONS" in
+    *Main*) wlr-randr --output "$MON" --preferred --pos 0,0 ;;
+    *right*) wlr-randr --output "$MON" --preferred --pos 1920,0 ;;
+    *left*) wlr-randr --output "$MON" --preferred --pos -1920,0 ;;
+    *Mirror*) wlr-randr --output "$MON" --preferred --pos 0,0 && notify-send "Display" "Mirror mode — adjust in settings" ;;
+    *Disable*) wlr-randr --output "$MON" --off ;;
+    *Auto*) wlr-randr --output "$MON" --preferred --pos 0,0 ;;
+esac
+
+notify-send "Display" "$MON: $OPTIONS"

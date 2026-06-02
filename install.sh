@@ -85,7 +85,14 @@ install_packages "System" \
     qt5ct qt6ct kvantum nwg-look \
     wlsunset autotiling \
     neovim nodejs npm \
-    tesseract tesseract-data-rus
+    tesseract tesseract-data-rus \
+    ripgrep eza bat fd git-delta lazygit \
+    tmux ncdu duf btop \
+    mpd mpc ncmpcpp pulsemixer \
+    tealdeer zbar wlr-randr \
+    tty-solitaire pipes.sh cmatrix \
+    asciiquarium nyancat \
+    sqlite libcanberra
 
 # ── AUR ────────────────────────────────────────
 header "AUR Packages"
@@ -93,24 +100,8 @@ install_packages "AUR" \
     hyprswitch cliphist nwg-displays \
     cava pywalfox \
     libastal-git libastal-4-git libastal-meta \
-    openclaw searxng-git
-
-# ── AGS (Aylur's Widget Suite) ────────────────
-header "AGS (Aylur's Widget Suite)"
-if command -v ags &>/dev/null; then
-    ok "AGS already installed ($(ags --version))"
-else
-    info "Building AGS from source..."
-    cd /tmp
-    git clone --depth=1 https://github.com/Aylur/ags.git
-    cd ags
-    npm install
-    meson setup build
-    meson compile -C build
-    sudo meson install -C build
-    cd /tmp && rm -rf ags
-    ok "AGS installed"
-fi
+    openclaw searxng-git \
+    bonsai.sh-git
 
 # ── Fisher + Tide ──────────────────────────────
 header "Fish Shell"
@@ -145,12 +136,21 @@ link_config "$DOTFILES/fish"           "$HOME/.config/fish"
 link_config "$DOTFILES/fastfetch"      "$HOME/.config/fastfetch"
 link_config "$DOTFILES/bin"            "$HOME/.local/bin"
 link_config "$DOTFILES/settings.ini"   "$HOME/.config/gtk-3.0/settings.ini"
-link_config "$DOTFILES/ags"            "$HOME/.config/ags"
 link_config "$DOTFILES/cava"           "$HOME/.config/cava"
+link_config "$DOTFILES/tmux"           "$HOME/.config/tmux"
+link_config "$DOTFILES/mpd"            "$HOME/.config/mpd"
+link_config "$DOTFILES/ncmpcpp"        "$HOME/.config/ncmpcpp"
+link_config "$DOTFILES/lazygit"        "$HOME/.config/lazygit"
+link_config "$DOTFILES/gitconfig"      "$HOME/.gitconfig"
 
 if [ -f "$DOTFILES/openclaw.json" ]; then
     mkdir -p "$HOME/.openclaw"
     link_config "$DOTFILES/openclaw.json" "$HOME/.openclaw/openclaw.json"
+fi
+
+# Enable githooks
+if [ -d "$DOTFILES/.githooks" ]; then
+    git -C "$DOTFILES" config core.hooksPath .githooks 2>/dev/null && ok "Git hooks enabled"
 fi
 
 ok "Configs linked"
@@ -161,12 +161,12 @@ echo -e "  ${GREEN}✓${NC} Configs installed"
 echo -e "  ${GREEN}✓${NC} Backup: $BACKUP"
 echo -e "  ${YELLOW}→${NC} Restart Hyprland (${BLUE}Super+M${NC})"
 echo -e "  ${YELLOW}→${NC} Run ${BLUE}pywal-update-all${NC} after wallpaper change"
-echo -e "  ${YELLOW}→${NC} AGS bar: ${BLUE}Super+A${NC} to toggle"
-
-if [ -f "$HOME/.cache/wal/colors.json" ]; then
-    pywal-update-all
-    ok "Applied current pywal colors"
-fi
+echo -e "  ${YELLOW}→${NC} Terminal: ${BLUE}ls${NC} (eza), ${BLUE}cat${NC} (bat), ${BLUE}lg${NC} (lazygit), ${BLUE}disk${NC} (ncdu)"
+echo -e "  ${YELLOW}→${NC} Music: ${BLUE}ncmpcpp${NC} (after adding songs to ~/Music)"
+echo -e "  ${YELLOW}→${NC} TMUX: ${BLUE}tmux${NC} (prefix Ctrl+A)"
+echo -e "  ${YELLOW}→${NC} Dotfiles TUI: ${BLUE}dotfiles-updater${NC}"
+echo -e "  ${YELLOW}→${NC} Settings app: ${BLUE}Super+Shift+S${NC}"
+echo -e "  ${YELLOW}→${NC} Run ${BLUE}pywal-update-all${NC} after install if pywal available"
 
 echo ""
 echo -e "${GREEN}Done! Enjoy your Hyprland rice.${NC}"

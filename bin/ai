@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Mistral AI CLI — send prompt from terminal
+# Usage: ai "prompt" or ai (interactive)
+
+MISTRAL_API_KEY="${MISTRAL_API_KEY:-}"
+[ -z "$MISTRAL_API_KEY" ] && echo "Error: MISTRAL_API_KEY not set" >&2 && exit 1
+
+PROMPT="$*"
+[ -z "$PROMPT" ] && echo -n "∮ " && read -r PROMPT
+[ -z "$PROMPT" ] && exit 0
+
+RESPONSE=$(curl -s https://api.mistral.ai/v1/chat/completions \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $MISTRAL_API_KEY" \
+    -d "{
+        \"model\": \"mistral-small-latest\",
+        \"messages\": [{\"role\": \"user\", \"content\": \"$PROMPT\"}],
+        \"max_tokens\": 2048
+    }" 2>/dev/null)
+
+MSG=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // "Error: " + (.error.message // "unknown")' 2>/dev/null)
+
+if [ -t 1 ]; then
+    # Running in terminal — show with bat if available
+    if command -v bat &>/dev/null && [ ${#MSG} -gt 200 ]; then
+        echo "$MSG" | bat -l md --paging=never
+    else
+        echo "$MSG"
+    fi
+else
+    # Piped — just output
+    echo "$MSG"
+fi

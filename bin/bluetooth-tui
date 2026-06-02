@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# Bluetooth manager via wofi
+
+DEVICES=$(bluetoothctl devices 2>/dev/null | while read -r mac name; do
+    info=$(bluetoothctl info "$mac" 2>/dev/null)
+    connected=$(echo "$info" | grep -q "Connected: yes" && echo "" || echo "")
+    echo "$connected $mac $name"
+done)
+
+[ -z "$DEVICES" ] && DEVICES="No devices found"
+
+CHOICE=$( { printf " Toggle Bluetooth\n Scan\n"; [ -n "$DEVICES" ] && echo "$DEVICES"; } | \
+    wofi --dmenu -p "Bluetooth")
+
+[ -z "$CHOICE" ] && exit 0
+
+case "$CHOICE" in
+    " Toggle Bluetooth")
+        if bluetoothctl show 2>/dev/null | grep -q "Powered: yes"; then
+            bluetoothctl power off
+            notify-send "Bluetooth" "Off"
+        else
+            bluetoothctl power on
+            notify-send "Bluetooth" "On"
+        fi
+        ;;
+    " Scan")
+        kitty --class=floating-term -e bash -c "bluetoothctl scan on & sleep 5; bluetoothctl devices; read -p 'Press enter'"
+        ;;
+    *)
+        MAC=$(echo "$CHOICE" | awk '{print $2}')
+        [ -n "$MAC" ] && bluetoothctl connect "$MAC" 2>/dev/null && notify-send "Bluetooth" "Connected to $MAC" || bluetoothctl disconnect "$MAC" 2>/dev/null && notify-send "Bluetooth" "Disconnected $MAC"
+        ;;
+esac

@@ -1,0 +1,29 @@
+gui:
+  theme:
+    lightTheme: false
+    activeBorderColor:
+      - "#575E60"
+      - bold
+    inactiveBorderColor:
+      - "#3C4346"
+    searchingActiveBorderColor:
+      - "#646C6D"
+      - bold
+    selectedLineBgColor:
+      - "#080b12"
+    optionsTextColor:
+      - "#c1c2c3"
+    selectedRangeBgColor:
+      - "#3C4346"
+  showFileIcons: true
+  showIcons: true
+  language: "en"
+git:
+  paging:
+    colorArg: always
+    pager: delta --dark --paging=never
+    useConfig: true
+  commitPrefixes:
+    dotfiles: "chore: "
+os:
+  editPreset: "nvim"

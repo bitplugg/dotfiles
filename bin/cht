@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# cheat.sh wrapper — query cheat sheets from terminal
+# Usage: cht command
+#        cht command subcommand
+#        cht ~language query
+
+QUERY="$*"
+[ -z "$QUERY" ] && printf "cheat.sh > " && read -r QUERY
+[ -z "$QUERY" ] && exit 0
+
+curl -s "https://cht.sh/$QUERY" 2>/dev/null | bat -l md --paging=never 2>/dev/null || curl -s "https://cht.sh/$QUERY" 2>/dev/null

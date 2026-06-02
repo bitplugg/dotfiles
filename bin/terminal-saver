@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Случайная терминальная заставка (детям)
+
+SAVERS=(
+    "cmatrix -C green"
+    "pipes.sh"
+    "asciiquarium"
+    "bonsai.sh --live"
+    "nyancat"
+)
+
+RANDOM=$$$(date +%s)
+CMD=${SAVERS[$RANDOM % ${#SAVERS[@]}]}
+
+kitty --class=floating-term -e bash -c "$CMD; read -p 'Press Enter...'"

@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Screenshot chooser via wofi
+
+choice=$(printf "Region\nScreen\nWindow\nDelay 5s\nOCR\nGallery" | \
+    wofi --dmenu -p "Screenshot")
+
+case "$choice" in
+    Region) hyprshot -m region ;;
+    Screen) hyprshot -m output ;;
+    Window) hyprshot -m window ;;
+    Delay*) hyprshot -m region --delay 5 ;;
+    OCR) ~/.local/bin/screenshot-ocr ;;
+    Gallery) ~/.local/bin/screenshot-gallery ;;
+esac

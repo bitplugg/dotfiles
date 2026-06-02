@@ -55,6 +55,11 @@ if command -v pywal-cava &>/dev/null; then
     pywal-cava
 fi
 
+# Update tmux colors
+if command -v pywal-tmux &>/dev/null; then
+    pywal-tmux
+fi
+
 # Reload waybar
 pkill -USR2 waybar 2>/dev/null || (pkill waybar 2>/dev/null; sleep 0.3; waybar &)
 
