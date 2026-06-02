@@ -1,98 +1,123 @@
-# ┏━┳┳┳━┳━┳┳━┓
-# ┃━┫┃┃┃━╋┓┃┃━┫
-# ┗━┻━┻┻━┻┻━┻┻━┛
+#  bitplugg's Hyprland Rice
 
-**bitplugg's Hyprland rice** — полностью автоматическая тема под обои через pywal16.
-Neovim, AI-агенты, аудио-визуализация, GTK-виджеты, приватный поисковик.
+Полностью автоматическая тема под обои через **pywal16**.  
+Всё в терминале — никаких GTK-виджетов, только TUI и Waybar.
 
-> 📖 **Полная документация** → [GitHub Wiki](https://github.com/bitplugg/dotfiles/wiki)
+> **OS:** Arch Linux · **WM:** Hyprland · **Shell:** Fish + Tide · **Terminal:** Kitty
 
 ---
 
-## 📦 Stack
+##  Stack
 
-| Компонент | Выбор | Назначение |
-|-----------|-------|------------|
-| **WM** | Hyprland | Композитор Wayland |
-| **Shell** | Fish + Tide | Оболочка |
-| **Terminal** | Kitty | GPU-терминал |
-| **Bar** | Waybar | Статус-бар |
-| **Notifications** | Swaync | Центр уведомлений |
-| **Launcher** | Rofi / Wofi | Меню приложений |
-| **Editor** | Neovim + lazy.nvim | IDE |
-| **AI Gateway** | OpenClaw | Mistral AI + Telegram |
-| **Search** | SearXNG | Приватный мета-поиск |
-| **Audio Viz** | Cava | Визуализатор |
-| **Wallpaper Picker** | fzf + chafa | Выбор обоев в терминале |
-| **Colors** | pywal16 | Авто-цвета от обоев |
-| **Wallpaper** | Awww | Плавная смена |
-| **Screen Lock** | Hyprlock | Блокировка |
-| **Clipboard** | Cliphist | История буфера |
+| Компонент | Выбор |
+|-----------|-------|
+| **WM** | Hyprland (Wayland) |
+| **Shell** | Fish + Tide |
+| **Terminal** | Kitty |
+| **Bar** | Waybar (30 тем, переключение `Super+Ctrl+,`) |
+| **Notifications** | Swaync |
+| **Launcher** | Wofi |
+| **Editor** | Neovim + lazy.nvim |
+| **AI** | Mistral (CLI: `Super+.`, `Super+Shift+.`) |
+| **Search** | SearXNG (`Super+/`) |
+| **Music** | MPD + ncmpcpp |
+| **Multiplexer** | Tmux + resurrect/continuum |
+| **Colors** | pywal16 → все конфиги |
+| **Wallpaper** | Awww (плавная), fzf+chafa (выбор `Super+W`) |
+| **Screen Lock** | Hyprlock |
+| **Git** | Lazygit + git-delta |
 
-## 🚀 Installation
+##  Скрипты (86 шт)
 
-**Требования:** Arch Linux, git, curl, paru
+Все в `~/.local/bin/` (симлинк на `dotfiles/bin/`).
+
+### Основные keybinds
+
+| Key | Команда |
+|-----|---------|
+| `Super+Return` | Kitty |
+| `Super+D` / `Super+R` | Wofi (приложения) |
+| `Super+Q` | Закрыть окно |
+| `Super+W` | Выбор обоев |
+| `Super+S` | Pywal swatch |
+| `Super+T` | Pomodoro таймер |
+| `Super+G` | Lazygit |
+| `Super+U` | Update all |
+| `Super+.` | AI prompt |
+| `Super+,` | Dotfiles settings TUI |
+| `Super+/` | Web search |
+| `Super+Escape` | Power menu |
+| `Super+F1` | Keybind help |
+| `Super+Ctrl+N` | WiFi manager |
+| `Super+Ctrl+K` | Package manager (paru) |
+| `Super+Ctrl+L` | Todo list |
+| `Super+Ctrl+,` | Waybar theme switcher |
+| `Super+Ctrl+Z` | Terminal screensaver |
+| `Print` | Screenshot монитор |
+| `Shift+Print` | Screenshot регион |
+| `Super+Print` | Screenshot окно |
+
+Полный список → `Super+F1`
+
+### 30 waybar тем
+
+`nord`, `dracula`, `catppuccin-mocha/latte`, `gruvbox-dark/light`, `tokyo-night`, `everforest`, `synthwave`, `cyberpunk`, `rose-pine`, `amoled`, `minimal`, `compact`, `glass`, `modern`, `retro` и другие.
+
+Переключение: `Super+Ctrl+,`
+
+---
+
+##  Установка
 
 ```bash
 git clone https://github.com/bitplugg/dotfiles.git ~/dotfiles
-cd ~/dotfiles && chmod +x install.sh && ./install.sh
+cd ~/dotfiles
+./install.sh
 ```
 
-Установщик: пакеты (system + AUR), Fisher + Tide, симлинки, pywal.
-
-После установки: `Super + M` (перезагрузка), `Super+W` (выбор обоев).
-
-## ⌨️ Keybinds
-
-| Клавиша | Действие |
-|---------|----------|
-| `Super+Return` | Терминал |
-| `Super+Q` | Закрыть окно |
-| `Super+F` | Fullscreen |
-| `Super+V` | Float toggle |
-| `Super+R/D` | App launcher |
-| `Super+W` | Wallpaper picker |
-| `Super+E` | Файловый менеджер |
-| `Super+O` | OpenClaw launcher |
-| `Super+L` | Блокировка |
-| `Super+N` | Уведомления |
-| `Super+Escape` | Power menu |
-| `Super+F1` | Keybind help |
-| `Print` | Скриншот |
-| `Super+arrows` | Фокус / перемещение |
-| `Super+1-9` | Рабочие столы |
-| `Super+Space` | Поиск приложений |
-
-Полный список → [Keybinds](https://github.com/bitplugg/dotfiles/wiki/Keybinds)
-
-## 🔗 Pages
-
-- **[Theming](https://github.com/bitplugg/dotfiles/wiki/Theming)** — pywal, цвета по компонентам
-- **[Components](https://github.com/bitplugg/dotfiles/wiki/Components)** — Hyprland, Waybar, Neovim, OpenClaw, SearXNG...
-- **[Scripts](https://github.com/bitplugg/dotfiles/wiki/Scripts)** — все 40+ скриптов
-- **[Customization](https://github.com/bitplugg/dotfiles/wiki/Customization)** — кастомизация
-- **[Troubleshooting](https://github.com/bitplugg/dotfiles/wiki/Troubleshooting)** — известные проблемы
-
-## 📁 Структура
-
-```
-~/.config/
-├── hypr/           # Hyprland (8 модулей)
-├── waybar/         # Статус-бар
-├── swaync/         # Уведомления
-├── rofi/           # Лаунчер
-├── kitty/          # Терминал
-├── nvim/           # Neovim (lazy.nvim)
-├── fish/           # Fish shell
-├── fastfetch/      # 10 пресетов
-├── cava/           # Аудио-визуализатор
-~/.local/bin/       # 40+ скриптов
-```
-
-## 🔗 Credits
-
-[Hyprland](https://hyprland.org) · [pywal16](https://github.com/eylles/pywal16) · [OpenClaw](https://opencode.ai) · [SearXNG](https://docs.searxng.org) · [Catppuccin](https://github.com/catppuccin) · [Bibata](https://github.com/ful1e5/Bibata_Cursor)
+После установки:
+- `pywal-update-all` — применить цвета
+- `Super+Super` — релоад Hyprland (если не применились бинды)
 
 ---
 
-*Сгенерировано с ❤️ и sudo*
+##  Структура
+
+```
+dotfiles/
+├── hypr/          — Hyprland (keybinds, settings, exec, monitors)
+├── waybar/        — Waybar config + style.css
+├── waybar-themes/ — 30 тем для waybar-switch
+├── kitty/         — Kitty terminal
+├── fish/          — Fish shell (config, aliases, abbrevs)
+├── nvim/          — Neovim
+├── tmux/          — Tmux (resurrect, continuum)
+├── mpd/           — MPD (музыкальный демон)
+├── ncmpcpp/       — Ncmpcpp (клиент mpd)
+├── lazygit/       — Lazygit config
+├── swaync/        — Swaync (уведомления)
+├── rofi/          — Rofi (на случай переключения)
+├── cava/          — Cava (аудио-визуализатор)
+├── fastfetch/     — Fastfetch
+├── bin/           — Все скрипты (86 шт)
+├── install.sh     — Установщик
+└── .githooks/     — Pre-commit хук (проверка секретов)
+```
+
+---
+
+##  API ключи
+
+Хранятся в `~/.config/fish/config.fish`:
+```fish
+set -x MISTRAL_API_KEY 'реальный_ключ'
+```
+
+В dotfiles — заглушка `'***'`.  
+Pre-commit хук блокирует коммит реальных ключей.
+
+---
+
+##  License
+
+MIT
