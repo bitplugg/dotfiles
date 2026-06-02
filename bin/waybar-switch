@@ -8,7 +8,7 @@ ACTIVE_NAME_FILE="$HOME/.config/waybar/.active-theme"
 CURRENT="default"
 [ -f "$ACTIVE_NAME_FILE" ] && CURRENT=$(cat "$ACTIVE_NAME_FILE")
 
-# Build menu: render labels with active marker
+# Build menu
 MENU=()
 NAMES=()
 while IFS='=' read -r LINE; do
@@ -26,7 +26,7 @@ done < "$THEME_DIR/themes.txt"
 CHOICE=$(printf '%s\n' "${MENU[@]}" | wofi --dmenu -p "Waybar theme" 2>/dev/null)
 [ -z "$CHOICE" ] && exit 0
 
-# Find index of choice
+# Find index
 IDX=-1
 for i in "${!MENU[@]}"; do
     [ "${MENU[$i]}" = "$CHOICE" ] && IDX=$i && break
@@ -39,13 +39,15 @@ THEME="${NAMES[$IDX]}"
 CSS_SRC="$THEME_DIR/style-$THEME.css"
 [ ! -f "$CSS_SRC" ] && notify-send "Waybar" "Theme $THEME not found" && exit 1
 
+# For non-default themes, they already have all @define-color lines
+# For default, it uses @import pywal — just copy as-is
 cp "$CSS_SRC" "$ACTIVE"
-if [ "$THEME" != "default" ]; then
-    sed -i "1i @import \"/home/bitplugg/.cache/wal/colors-waybar.css\";" "$ACTIVE"
-fi
 
 echo "$THEME" > "$ACTIVE_NAME_FILE"
+
+# Fully restart waybar
 killall waybar 2>/dev/null
+sleep 0.5
+hyprctl dispatch exec waybar 2>/dev/null || (waybar &>/dev/null & disown)
 sleep 0.3
-waybar &>/dev/null & disown
 notify-send "Waybar" "Theme: $THEME"

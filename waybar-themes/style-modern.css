@@ -1,13 +1,13 @@
 @define-color background #181825;
 @define-color foreground #a6adc8;
-@define-color color1 ;
-@define-color color2 ;
-@define-color color3 ;
+@define-color color1 #f38ba8;
+@define-color color2 #a6e3a1;
+@define-color color3 #f9e2af;
 @define-color color4 #74c7ec;
-@define-color color5 ;
-@define-color color6 ;
-@define-color color7 ;
-@define-color color8 ;
+@define-color color5 #cba6f7;
+@define-color color6 #94e2d5;
+@define-color color7 #bac2de;
+@define-color color8 #585b70;
 
 
 * {
@@ -313,11 +313,4 @@ tooltip label {
     color: @foreground;
 }
 
-* {
-    font-size: 13px;
-    border-radius: 0px;
-}
-
-#workspaces, #clock, #cpu, #memory, #network, #pulseaudio, #battery, #tray, #custom-launcher, #window, #custom-media, #custom-quicksettings, #custom-screenshot, #custom-keyboard, #custom-updates, #custom-weather, #custom-mic, #custom-nightmode, #custom-idleinhibitor, #custom-colorpicker, #custom-cava, #custom-power, #bluetooth {
-    background: alpha(#181825, 0.85);
-}
+* { border-radius: 0 !important; }
